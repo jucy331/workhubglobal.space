@@ -1,19 +1,19 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../firebase"; // adjust path as needed
 
 export default function JobsPage() {
-  const [activeTab, setActiveTab] = useState("all");
-  const [showActivateDialog, setShowActivateDialog] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("is_authenticated") === "true";
-    if (!isAuthenticated) {
-      router.replace("/");
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        router.replace("/"); // Redirect to home if not signed in
+      }
+    });
+    return () => unsubscribe();
   }, [router]);
-  // --->>>
 
 // Helper to generate recent dates for jobs
 function getRecentDate(daysAgo: number) {
