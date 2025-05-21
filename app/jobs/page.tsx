@@ -1,92 +1,195 @@
-"use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+"use client"
 
-interface Job {
-  id: string;
-  title: string;
-  company: string;
-  description: string;
+import { ArrowLeft } from "lucide-react"
+import Link from "next/link"
+import { useParams, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+
+const jobData: Record<string, any> = {
+  // ... jobData stays the same
 }
 
-export default function JobsPage() {
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [showActivateDialog, setShowActivateDialog] = useState(false);
-  const router = useRouter();
+export default function JobDetailPage() {
+  const params = useParams()
+  const router = useRouter()
+  const [job, setJob] = useState<any>(null)
+  const [isActivated, setIsActivated] = useState(false)
+  const [activationDialogOpen, setActivationDialogOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const jobId = params.id as string
 
   useEffect(() => {
-    // Fetch sample jobs (you can replace with actual API later)
-    setJobs([
-      {
-        id: "1",
-        title: "Remote AI Data Trainer",
-        company: "OpenAI Tasks",
-        description: "Train AI models by completing simple language tasks.",
-      },
-      {
-        id: "2",
-        title: "Transcription Job",
-        company: "AudioText Inc.",
-        description: "Transcribe audio files for various clients.",
-      },
-    ]);
-  }, []);
-
-  const handleViewDetails = (jobId: string) => {
-    const isActivated = localStorage.getItem("account_activated") === "true";
-    if (isActivated) {
-      router.push(`/jobs/${jobId}`);
-    } else {
-      setShowActivateDialog(true);
+    // Check activation status
+    const activationStatus = localStorage.getItem("account_activated")
+    if (activationStatus === "true") {
+      setIsActivated(true)
     }
-  };
 
-  return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Latest Remote Jobs</h1>
-      <div className="grid gap-4">
-        {jobs.map((job) => (
-          <div key={job.id} className="border p-4 rounded-xl shadow">
-            <h2 className="text-xl font-semibold">{job.title}</h2>
-            <p className="text-sm text-gray-600">{job.company}</p>
-            <p className="mt-2">{job.description}</p>
-            <button
-              onClick={() => handleViewDetails(job.id)}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              View Details & Apply
-            </button>
-          </div>
-        ))}
-      </div>
+    // Check if returned from PayPal
+    const pendingJobId = sessionStorage.getItem("pending_job_id")
+    if (pendingJobId === jobId) {
+      localStorage.setItem("account_activated", "true")
+      setIsActivated(true)
+      sessionStorage.removeItem("pending_job_id")
+    }
 
-      {showActivateDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-lg max-w-md text-center">
-            <h2 className="text-xl font-bold mb-2">Activate Your Account</h2>
-            <p className="mb-4 text-gray-700">
-              Pay a one-time $5 fee to access all job details and apply.
-            </p>
-            <a
-              href="https://www.paypal.com/ncp/payment/HX5S7CVY9BQQ2"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-            >
-              Pay $5 on PayPal
-            </a>
-            <p className="text-xs text-gray-500 mt-2">
-              After payment, return here and refresh the page.
-            </p>
-            <button
-              onClick={() => setShowActivateDialog(false)}
-              className="mt-4 text-sm text-blue-500 hover:underline"
-            >
-              Close
-            </button>
-          </div>
+    // Load job
+    if (jobData[jobId]) {
+      setJob(jobData[jobId])
+    } else {
+      router.push("/jobs")
+    }
+
+    setLoading(false)
+  }, [jobId, router])
+
+  const handlePaymentRedirect = () => {
+    sessionStorage.setItem("pending_job_id", jobId)
+    window.location.href = "https://www.paypal.com/ncp/payment/HX5S7CVY9BQQ2"
+  }
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto text-center">
+          <p>Loading job details...</p>
         </div>
-      )}
+      </div>
+    )
+  }
+
+  if (!job) {
+    return null
+  }
+
+  if (!isActivated) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto">
+          <Link href="/jobs" className="inline-flex items-center text-sm mb-6 hover:underline">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to all jobs
+          </Link>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">{job.title}</CardTitle>
+              <CardDescription>{job.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-medium text-sm mb-1">Pay Range</h3>
+                    <p>{job.payRange}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-sm mb-1">Time Commitment</h3>
+                    <p>{job.estimatedTime}</p>
+                  </div>
+                </div>
+
+                <div className="bg-muted p-6 rounded-lg border text-center">
+                  <h2 className="text-xl font-semibold mb-2">Account Activation Required</h2>
+                  <p className="mb-4">
+                    To view complete job details and apply for this position, please activate your account.
+                  </p>
+                  <Button onClick={() => setActivationDialogOpen(true)}>Activate Account ($5.00)</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Dialog open={activationDialogOpen} onOpenChange={setActivationDialogOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Account Activation Required</DialogTitle>
+                <DialogDescription>
+                  To view job details and apply for positions, a one-time account activation fee of $5.00 is required.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col space-y-4 py-4">
+                <div className="rounded-md bg-muted p-4">
+                  <h3 className="font-medium mb-2">Benefits of Account Activation:</h3>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>Access to all job details and application forms</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>Apply to unlimited job opportunities</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>Receive job alerts for new opportunities</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>Track your applications and earnings</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="text-center font-medium">One-time payment: $5.00</div>
+              </div>
+              <DialogFooter className="flex-col sm:flex-row sm:justify-between">
+                <Button variant="outline" onClick={() => setActivationDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handlePaymentRedirect}>Activate Account</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+    )
+  }
+
+  // 🔓 Activated users see full job details
+  return (
+    <div className="container mx-auto px-4 py-12">
+      <div className="max-w-4xl mx-auto">
+        <Link href="/jobs" className="inline-flex items-center text-sm mb-6 hover:underline">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to all jobs
+        </Link>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">{job.title}</CardTitle>
+            <CardDescription>{job.description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-medium text-sm mb-1">Pay Range</h3>
+                  <p>{job.payRange}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm mb-1">Time Commitment</h3>
+                  <p>{job.estimatedTime}</p>
+                </div>
+              </div>
+              <div
+                className="prose max-w-none"
+                dangerouslySetInnerHTML={{ __html: job.fullDescription }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  );
+  )
 }
