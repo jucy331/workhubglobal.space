@@ -189,31 +189,7 @@ const JOBS: Job[] = [
     tags: ["Remote", "Flexible"],
     category: "other",
   },
-];useEffect(() => {
-  const fetchJobs = async () => {
-    try {
-      const response = await fetch('https://remotive.com/api/remote-jobs');
-      const data = await response.json();
-      const keywords = ['survey', 'transcription', 'captioning', 'annotation', 'ai training'];
-      const filteredJobs = data.jobs.filter((job: any) =>
-        keywords.some(keyword => job.title.toLowerCase().includes(keyword))
-      );
-      setJobs(filteredJobs);
-    } catch (error) {
-      console.error('Failed to fetch jobs:', error);
-    }
-  };
-
-  // Initial fetch
-  fetchJobs();
-
-  // Refresh every 3 minutes
-  const interval = setInterval(fetchJobs, 180000);
-
-  // Cleanup interval on unmount
-  return () => clearInterval(interval);
-}, []);
- 
+]
 
 export default function JobsPage() {
   const [activeTab, setActiveTab] = useState("all");
