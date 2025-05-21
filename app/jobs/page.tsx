@@ -2,6 +2,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+export default function ProtectedPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem("is_authenticated") === "true";
+    if (!isAuthenticated) {
+      router.replace("/"); // Redirect to home if not signed in
+    }
+  }, [router]);
+  
 // Helper to generate recent dates for jobs
 function getRecentDate(daysAgo: number) {
   const date = new Date();
