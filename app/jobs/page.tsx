@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase"; // adjust path as needed
 
@@ -15,6 +16,7 @@ export default function JobsPage() {
     });
     return () => unsubscribe();
   }, [router]);
+  }
 
 // Helper to generate recent dates for jobs
 function getRecentDate(daysAgo: number) {
