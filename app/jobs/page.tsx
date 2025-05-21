@@ -1,15 +1,19 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-export default function ProtectedPage() {
+
+export default function JobsPage() {
+  const [activeTab, setActiveTab] = useState("all");
+  const [showActivateDialog, setShowActivateDialog] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("is_authenticated") === "true";
     if (!isAuthenticated) {
-      router.replace("/"); // Redirect to home if not signed in
+      router.replace("/");
     }
   }, [router]);
+  // --->>>
 
 // Helper to generate recent dates for jobs
 function getRecentDate(daysAgo: number) {
