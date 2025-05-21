@@ -2,7 +2,15 @@ import { initializeApp, getApps, getApp } from "firebase/app"
 import { getAuth, connectAuthEmulator } from "firebase/auth"
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore"
 import { getStorage, connectStorageEmulator } from "firebase/storage"
+const firebaseConfig = {
+  apiKey: "AIzaSyC5n1Bc2bLmZpKmjweMYu9w6mbRTl-66Qs",
+  authDomain: "workhub-website-1ef15.firebaseapp.com",
+  projectId: "workhub-website-1ef15",
+  // ...other config
+};
 
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
 // Check if we're running on the client side
 const isBrowser = typeof window !== "undefined"
 
