@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
+import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AlertCircle, Loader2, Upload } from "lucide-react"
@@ -267,9 +268,58 @@ export default function ApplyPage() {
                         🚫 To apply for jobs, please activate your account for a one-time fee of $5. Once your payment
                         is verified, you'll gain full access to the application system.
                       </p>
-                      <Button asChild>
-                        <Link href="/activate-account">Activate Your Account</Link>
-                      </Button>
+                      <div className="mb-4">
+                        <h4 className="font-semibold mb-2">Benefits of Account Activation:</h4>
+                        <ul className="list-disc pl-5 text-sm text-gray-700 mb-2">
+                          <li>Access to all job details and application forms</li>
+                          <li>Apply to unlimited job opportunities</li>
+                          <li>Receive job alerts for new opportunities</li>
+                          <li>Track your applications and earnings</li>
+                        </ul>
+                        <div className="text-center font-medium">One-time payment: $5.00</div>
+                      </div>
+                      <form
+                        action="https://www.paypal.com/ncp/payment/8M4GB5JBDTP9U"
+                        method="post"
+                        target="_blank"
+                        style={{
+                          display: "inline-grid",
+                          justifyItems: "center",
+                          alignContent: "start",
+                          gap: "0.5rem",
+                          marginTop: "1rem"
+                        }}
+                      >
+                        <input
+                          className="pp-8M4GB5JBDTP9U"
+                          type="submit"
+                          value="Activate Account ($5.00)"
+                          style={{
+                            textAlign: "center",
+                            border: "none",
+                            borderRadius: "0.25rem",
+                            minWidth: "11.625rem",
+                            padding: "0 2rem",
+                            height: "2.625rem",
+                            fontWeight: "bold",
+                            backgroundColor: "#FFD140",
+                            color: "#000000",
+                            fontFamily: '"Helvetica Neue",Arial,sans-serif',
+                            fontSize: "1rem",
+                            lineHeight: "1.25rem",
+                            cursor: "pointer",
+                          }}
+                        />
+                        <img src="https://www.paypalobjects.com/images/Debit_Credit.svg" alt="cards" />
+                        <section style={{ fontSize: "0.75rem" }}>
+                          Powered by{" "}
+                          <img
+                            src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg"
+                            alt="paypal"
+                            style={{ height: "0.875rem", verticalAlign: "middle" }}
+                          />
+                        </section>
+                      </form>
                     </div>
                   </div>
                 </div>
