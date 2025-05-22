@@ -34,6 +34,7 @@ export default function DashboardPage() {
   const [applications, setApplications] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [showActivateDialog, setShowActivateDialog] = useState(false)
 
   // Get the active tab from URL params or default to 'applications'
   const activeTab = searchParams.get("tab") || "applications"
