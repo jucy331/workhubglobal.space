@@ -268,7 +268,8 @@ const jobData: Record<string, Job> = {
     payRange: "$4-$12 per survey",
     requirements: "Internet access, student or parent",
     estimatedTime: "10-20 minutes per survey",
-  }"virtual-assistant-001": {
+  },
+  "virtual-assistant-001": {
   title: "Virtual Assistant",
   description: "Assist businesses remotely with scheduling, email, and admin tasks.",
   fullDescription: `
