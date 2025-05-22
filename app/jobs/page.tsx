@@ -18,7 +18,7 @@ type Job = {
 
 const jobData: Record<string, Job> = {
   "survey-tester-001": {
-    title: "Product Survey Tester",
+    title: "Product Tester",
     description:
       "Share your opinions on new products and services through our detailed survey platform. Your feedback helps companies improve their offerings and marketing strategies.",
     fullDescription: `
@@ -269,7 +269,7 @@ const jobData: Record<string, Job> = {
     requirements: "Internet access, student or parent",
     estimatedTime: "10-20 minutes per survey",
   },
-  "virtual-assistant-001": {
+  "virtual-assistant-011": {
   title: "Virtual Assistant",
   description: "Assist businesses remotely with scheduling, email, and admin tasks.",
   fullDescription: `
@@ -297,7 +297,7 @@ const jobData: Record<string, Job> = {
   requirements: "Organizational skills, communication, internet",
   estimatedTime: "10-40 hours/week",
 },
-"data-entry-001": {
+"data-entry-011": {
   title: "Remote Data Entry Clerk",
   description: "Enter and update data for our clients from home.",
   fullDescription: `
@@ -324,7 +324,7 @@ const jobData: Record<string, Job> = {
   requirements: "Attention to detail, computer skills",
   estimatedTime: "Flexible",
 },
-"content-writer-001": {
+"content-writer-012": {
   title: "Freelance Content Writer",
   description: "Write articles and blog posts for various online platforms.",
   fullDescription: `
@@ -351,7 +351,7 @@ const jobData: Record<string, Job> = {
   requirements: "Writing skills, research, internet",
   estimatedTime: "Varies by assignment",
 },
-"customer-support-001": {
+"customer-support-013": {
   title: "Remote Customer Support Agent",
   description: "Assist customers via chat and email from your home office.",
   fullDescription: `
@@ -378,7 +378,7 @@ const jobData: Record<string, Job> = {
   requirements: "Communication, problem-solving, internet",
   estimatedTime: "20-40 hours/week",
 },
-"social-media-001": {
+"social-media-014": {
   title: "Social Media Evaluator",
   description: "Review and rate social media content for quality and relevance.",
   fullDescription: `
@@ -405,7 +405,7 @@ const jobData: Record<string, Job> = {
   requirements: "Social media knowledge, detail-oriented",
   estimatedTime: "Flexible",
 },
-"product-tester-001": {
+"product-tester-015": {
   title: "Remote Product Tester",
   description: "Test new products and provide feedback from home.",
   fullDescription: `
@@ -431,7 +431,7 @@ const jobData: Record<string, Job> = {
   requirements: "Internet, attention to detail",
   estimatedTime: "15-30 minutes per review",
 },
-"website-tester-001": {
+"website-tester-016": {
   title: "Website Usability Tester",
   description: "Test websites and apps for usability and report issues.",
   fullDescription: `
@@ -457,7 +457,7 @@ const jobData: Record<string, Job> = {
   requirements: "Computer/smartphone, internet",
   estimatedTime: "10-30 minutes per test",
 },
-"online-tutor-001": {
+"online-tutor-017": {
   title: "Online Tutor",
   description: "Teach students online in your area of expertise.",
   fullDescription: `
@@ -484,7 +484,7 @@ const jobData: Record<string, Job> = {
   requirements: "Subject expertise, communication, internet",
   estimatedTime: "Flexible",
 },
-"graphic-designer-001": {
+"graphic-designer-018": {
   title: "Freelance Graphic Designer",
   description: "Design graphics and visuals for clients remotely.",
   fullDescription: `
@@ -511,7 +511,7 @@ const jobData: Record<string, Job> = {
   requirements: "Design skills, portfolio, internet",
   estimatedTime: "Varies by project",
 },
-"translation-001": {
+"translation-019": {
   title: "Remote Translator",
   description: "Translate documents and content between languages.",
   fullDescription: `
@@ -538,7 +538,7 @@ const jobData: Record<string, Job> = {
   requirements: "Fluency in 2+ languages, detail-oriented",
   estimatedTime: "Varies by project",
 },
-"video-captioner-001": {
+"video-captioner-020": {
   title: "Video Captioner",
   description: "Create captions for online videos and webinars.",
   fullDescription: `
@@ -565,7 +565,7 @@ const jobData: Record<string, Job> = {
   requirements: "Listening, typing, detail-oriented",
   estimatedTime: "Varies by video",
 },
-"microtask-worker-001": {
+"microtask-worker-021": {
   title: "Online Microtask Worker",
   description: "Complete small online tasks for quick payments.",
   fullDescription: `
@@ -590,7 +590,7 @@ const jobData: Record<string, Job> = {
   requirements: "Internet, attention to detail",
   estimatedTime: "1-10 minutes per task",
 },
-"app-tester-001": {
+"app-tester-022": {
   title: "Mobile App Tester",
   description: "Test mobile apps and report bugs or usability issues.",
   fullDescription: `
@@ -616,7 +616,7 @@ const jobData: Record<string, Job> = {
   requirements: "Smartphone/tablet, internet",
   estimatedTime: "10-30 minutes per app",
 },
-"online-moderator-001": {
+"online-moderator-023": {
   title: "Online Community Moderator",
   description: "Moderate forums and social groups to ensure positive interactions.",
   fullDescription: `
@@ -643,7 +643,7 @@ const jobData: Record<string, Job> = {
   requirements: "Judgment, communication, internet",
   estimatedTime: "Flexible",
 },
-"review-writer-001": {
+"review-writer-024": {
   title: "Online Review Writer",
   description: "Write reviews for products, services, and apps.",
   fullDescription: `
@@ -668,7 +668,7 @@ const jobData: Record<string, Job> = {
   requirements: "Writing skills, internet",
   estimatedTime: "10-20 minutes per review",
 },
-"voice-actor-001": {
+"voice-actor-025": {
   title: "Remote Voice Actor",
   description: "Record voiceovers for videos, ads, and audiobooks.",
   fullDescription: `
@@ -694,7 +694,7 @@ const jobData: Record<string, Job> = {
   requirements: "Voice, recording setup, internet",
   estimatedTime: "Varies by project",
 },
-"survey-011": {
+"survey-026": {
   title: "Consumer Electronics Surveyor",
   description: "Share your opinions on the latest gadgets and electronics.",
   fullDescription: `
@@ -719,7 +719,7 @@ const jobData: Record<string, Job> = {
   requirements: "Interest in tech, internet",
   estimatedTime: "10-20 minutes per survey",
 },
-"survey-012": {
+"survey-027": {
   title: "Travel Experience Surveyor",
   description: "Answer surveys about your travel experiences and preferences.",
   fullDescription: `
