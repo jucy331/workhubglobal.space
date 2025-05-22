@@ -979,9 +979,10 @@ type Job = {
   requirements: "Student, internet",
   estimatedTime: "5-15 minutes per survey",
   category: "Student Jobs",
-}
 
-}const jobsByCategory: Record<string, Job[]> = {}
+}
+}
+const jobsByCategory: Record<string, Job[]> = {}
 Object.entries(jobData).forEach(([id, job]) => {
   if (!jobsByCategory[job.category]) {
     jobsByCategory[job.category] = []
