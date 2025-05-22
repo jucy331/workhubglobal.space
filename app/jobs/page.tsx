@@ -268,9 +268,682 @@ const jobData: Record<string, Job> = {
     payRange: "$4-$12 per survey",
     requirements: "Internet access, student or parent",
     estimatedTime: "10-20 minutes per survey",
-  }
-} // <-- No trailing comma here!
-
+  }"virtual-assistant-001": {
+  title: "Virtual Assistant",
+  description: "Assist businesses remotely with scheduling, email, and admin tasks.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Virtual Assistant, you'll support clients with administrative tasks, scheduling, and communication.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Manage emails and calendars</li>
+      <li>Schedule appointments and meetings</li>
+      <li>Prepare documents and reports</li>
+      <li>Perform data entry and research</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Strong organizational skills</li>
+      <li>Good written communication</li>
+      <li>Reliable internet connection</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$8-$15 per hour, paid weekly.</p>
+    <h2>How to Apply</h2>
+    <p>Submit your resume and a brief cover letter.</p>
+  `,
+  payRange: "$8-$15 per hour",
+  requirements: "Organizational skills, communication, internet",
+  estimatedTime: "10-40 hours/week",
+},
+"data-entry-001": {
+  title: "Remote Data Entry Clerk",
+  description: "Enter and update data for our clients from home.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Data Entry Clerk, you'll input and update information in databases and spreadsheets.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Enter data accurately and efficiently</li>
+      <li>Verify and correct data as needed</li>
+      <li>Maintain confidentiality of information</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Attention to detail</li>
+      <li>Basic computer skills</li>
+      <li>Reliable internet connection</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$10-$14 per hour, paid biweekly.</p>
+    <h2>How to Apply</h2>
+    <p>Complete the application form and submit a typing test.</p>
+  `,
+  payRange: "$10-$14 per hour",
+  requirements: "Attention to detail, computer skills",
+  estimatedTime: "Flexible",
+},
+"content-writer-001": {
+  title: "Freelance Content Writer",
+  description: "Write articles and blog posts for various online platforms.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Freelance Content Writer, you'll create engaging content for websites, blogs, and social media.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Research and write articles on assigned topics</li>
+      <li>Meet deadlines for content delivery</li>
+      <li>Edit and proofread your work</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Excellent writing skills</li>
+      <li>Ability to research topics independently</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$20-$50 per article, depending on length and complexity.</p>
+    <h2>How to Apply</h2>
+    <p>Submit writing samples and a brief bio.</p>
+  `,
+  payRange: "$20-$50 per article",
+  requirements: "Writing skills, research, internet",
+  estimatedTime: "Varies by assignment",
+},
+"customer-support-001": {
+  title: "Remote Customer Support Agent",
+  description: "Assist customers via chat and email from your home office.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Customer Support Agent, you'll help customers resolve issues and answer questions online.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Respond to customer inquiries via chat and email</li>
+      <li>Document and escalate issues as needed</li>
+      <li>Provide excellent service and support</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Good communication skills</li>
+      <li>Problem-solving ability</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$12-$18 per hour, paid monthly.</p>
+    <h2>How to Apply</h2>
+    <p>Apply online and complete a short assessment.</p>
+  `,
+  payRange: "$12-$18 per hour",
+  requirements: "Communication, problem-solving, internet",
+  estimatedTime: "20-40 hours/week",
+},
+"social-media-001": {
+  title: "Social Media Evaluator",
+  description: "Review and rate social media content for quality and relevance.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Social Media Evaluator, you'll assess posts, ads, and videos for quality and appropriateness.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Review and rate social media content</li>
+      <li>Follow guidelines for content evaluation</li>
+      <li>Provide feedback on trends and issues</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Familiarity with social media platforms</li>
+      <li>Attention to detail</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$7-$12 per hour, paid weekly.</p>
+    <h2>How to Apply</h2>
+    <p>Sign up and complete a qualification test.</p>
+  `,
+  payRange: "$7-$12 per hour",
+  requirements: "Social media knowledge, detail-oriented",
+  estimatedTime: "Flexible",
+},
+"product-tester-001": {
+  title: "Remote Product Tester",
+  description: "Test new products and provide feedback from home.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Product Tester, you'll receive products to try and review from your home.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Test products and complete feedback forms</li>
+      <li>Share honest opinions and suggestions</li>
+      <li>Meet review deadlines</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Internet access</li>
+      <li>Attention to detail</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$10-$25 per product review, plus free products.</p>
+    <h2>How to Apply</h2>
+    <p>Apply online and provide your shipping address.</p>
+  `,
+  payRange: "$10-$25 per review",
+  requirements: "Internet, attention to detail",
+  estimatedTime: "15-30 minutes per review",
+},
+"website-tester-001": {
+  title: "Website Usability Tester",
+  description: "Test websites and apps for usability and report issues.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Usability Tester, you'll review websites and apps, providing feedback on user experience.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Test websites and apps on various devices</li>
+      <li>Report bugs and usability issues</li>
+      <li>Complete feedback surveys</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Computer or smartphone</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$8-$20 per test, paid after completion.</p>
+    <h2>How to Apply</h2>
+    <p>Sign up and complete a sample test.</p>
+  `,
+  payRange: "$8-$20 per test",
+  requirements: "Computer/smartphone, internet",
+  estimatedTime: "10-30 minutes per test",
+},
+"online-tutor-001": {
+  title: "Online Tutor",
+  description: "Teach students online in your area of expertise.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As an Online Tutor, you'll help students learn and succeed in various subjects.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Conduct virtual tutoring sessions</li>
+      <li>Prepare lesson plans and materials</li>
+      <li>Track student progress</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Subject expertise</li>
+      <li>Good communication skills</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$15-$30 per hour, paid monthly.</p>
+    <h2>How to Apply</h2>
+    <p>Submit your resume and teaching credentials.</p>
+  `,
+  payRange: "$15-$30 per hour",
+  requirements: "Subject expertise, communication, internet",
+  estimatedTime: "Flexible",
+},
+"graphic-designer-001": {
+  title: "Freelance Graphic Designer",
+  description: "Design graphics and visuals for clients remotely.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Freelance Graphic Designer, you'll create logos, banners, and marketing materials for clients.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Design graphics based on client briefs</li>
+      <li>Revise designs as needed</li>
+      <li>Deliver files in required formats</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Graphic design skills</li>
+      <li>Portfolio of previous work</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$30-$100 per project, depending on scope.</p>
+    <h2>How to Apply</h2>
+    <p>Submit your portfolio and a short cover letter.</p>
+  `,
+  payRange: "$30-$100 per project",
+  requirements: "Design skills, portfolio, internet",
+  estimatedTime: "Varies by project",
+},
+"translation-001": {
+  title: "Remote Translator",
+  description: "Translate documents and content between languages.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Translator, you'll convert written content from one language to another.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Translate documents accurately</li>
+      <li>Meet deadlines for translation projects</li>
+      <li>Proofread and edit translations</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Fluency in at least two languages</li>
+      <li>Attention to detail</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$0.05-$0.15 per word, paid after project completion.</p>
+    <h2>How to Apply</h2>
+    <p>Submit your resume and language certifications.</p>
+  `,
+  payRange: "$0.05-$0.15 per word",
+  requirements: "Fluency in 2+ languages, detail-oriented",
+  estimatedTime: "Varies by project",
+},
+"video-captioner-001": {
+  title: "Video Captioner",
+  description: "Create captions for online videos and webinars.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Video Captioner, you'll transcribe and time captions for video content.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Transcribe spoken content from videos</li>
+      <li>Sync captions with video timing</li>
+      <li>Review and edit captions for accuracy</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Good listening and typing skills</li>
+      <li>Attention to detail</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$1-$2 per video minute, paid weekly.</p>
+    <h2>How to Apply</h2>
+    <p>Submit a sample captioning assignment.</p>
+  `,
+  payRange: "$1-$2 per video minute",
+  requirements: "Listening, typing, detail-oriented",
+  estimatedTime: "Varies by video",
+},
+"microtask-worker-001": {
+  title: "Online Microtask Worker",
+  description: "Complete small online tasks for quick payments.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Microtask Worker, you'll perform simple online tasks such as data labeling, categorization, and surveys.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Complete assigned microtasks accurately</li>
+      <li>Meet daily or weekly quotas</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Internet access</li>
+      <li>Attention to detail</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$0.05-$1 per task, paid instantly or weekly.</p>
+    <h2>How to Apply</h2>
+    <p>Sign up and start working immediately.</p>
+  `,
+  payRange: "$0.05-$1 per task",
+  requirements: "Internet, attention to detail",
+  estimatedTime: "1-10 minutes per task",
+},
+"app-tester-001": {
+  title: "Mobile App Tester",
+  description: "Test mobile apps and report bugs or usability issues.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Mobile App Tester, you'll install and test apps, providing feedback to developers.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Test apps on your device</li>
+      <li>Report bugs and issues</li>
+      <li>Complete feedback forms</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Smartphone or tablet</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$5-$15 per app test, paid after completion.</p>
+    <h2>How to Apply</h2>
+    <p>Sign up and download the test app.</p>
+  `,
+  payRange: "$5-$15 per app",
+  requirements: "Smartphone/tablet, internet",
+  estimatedTime: "10-30 minutes per app",
+},
+"online-moderator-001": {
+  title: "Online Community Moderator",
+  description: "Moderate forums and social groups to ensure positive interactions.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Community Moderator, you'll review posts and comments, enforce rules, and foster a positive environment.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Monitor online communities</li>
+      <li>Remove inappropriate content</li>
+      <li>Respond to member questions</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Good judgment</li>
+      <li>Communication skills</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$10-$18 per hour, paid monthly.</p>
+    <h2>How to Apply</h2>
+    <p>Apply online and complete a moderation scenario test.</p>
+  `,
+  payRange: "$10-$18 per hour",
+  requirements: "Judgment, communication, internet",
+  estimatedTime: "Flexible",
+},
+"review-writer-001": {
+  title: "Online Review Writer",
+  description: "Write reviews for products, services, and apps.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Review Writer, you'll share your experiences with products and services online.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Write honest and detailed reviews</li>
+      <li>Follow guidelines for each review</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Good writing skills</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$3-$10 per review, paid after approval.</p>
+    <h2>How to Apply</h2>
+    <p>Submit a sample review and your profile.</p>
+  `,
+  payRange: "$3-$10 per review",
+  requirements: "Writing skills, internet",
+  estimatedTime: "10-20 minutes per review",
+},
+"voice-actor-001": {
+  title: "Remote Voice Actor",
+  description: "Record voiceovers for videos, ads, and audiobooks.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Voice Actor, you'll record scripts for various audio projects from your home studio.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Record and edit voiceovers</li>
+      <li>Deliver files in required formats</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Clear speaking voice</li>
+      <li>Microphone and recording setup</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$20-$100 per project, depending on length.</p>
+    <h2>How to Apply</h2>
+    <p>Submit a voice sample and your rates.</p>
+  `,
+  payRange: "$20-$100 per project",
+  requirements: "Voice, recording setup, internet",
+  estimatedTime: "Varies by project",
+},
+"survey-011": {
+  title: "Consumer Electronics Surveyor",
+  description: "Share your opinions on the latest gadgets and electronics.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Consumer Electronics Surveyor, you'll participate in surveys about new tech products and trends.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Complete electronics-related surveys</li>
+      <li>Share honest feedback on gadgets</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Interest in technology</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$4-$10 per survey, paid monthly.</p>
+    <h2>How to Apply</h2>
+    <p>Register and start receiving survey invitations.</p>
+  `,
+  payRange: "$4-$10 per survey",
+  requirements: "Interest in tech, internet",
+  estimatedTime: "10-20 minutes per survey",
+},
+"survey-012": {
+  title: "Travel Experience Surveyor",
+  description: "Answer surveys about your travel experiences and preferences.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Travel Experience Surveyor, you'll help travel companies improve their services by sharing your experiences.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Complete travel-related surveys</li>
+      <li>Share honest opinions on destinations and services</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Interest in travel</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$5-$12 per survey, paid after completion.</p>
+    <h2>How to Apply</h2>
+    <p>Sign up and complete your travel profile.</p>
+  `,
+  payRange: "$5-$12 per survey",
+  requirements: "Interest in travel, internet",
+  estimatedTime: "10-25 minutes per survey",
+},
+"survey-013": {
+  title: "Food & Beverage Surveyor",
+  description: "Participate in surveys about food, drinks, and dining experiences.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Food & Beverage Surveyor, you'll share your opinions on food products and dining experiences.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Complete food-related surveys</li>
+      <li>Share honest feedback on products and restaurants</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Interest in food and dining</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$3-$9 per survey, paid monthly.</p>
+    <h2>How to Apply</h2>
+    <p>Register and start participating in surveys.</p>
+  `,
+  payRange: "$3-$9 per survey",
+  requirements: "Interest in food, internet",
+  estimatedTime: "5-15 minutes per survey",
+},
+"survey-014": {
+  title: "Mobile Usage Surveyor",
+  description: "Share your mobile phone usage habits in quick surveys.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Mobile Usage Surveyor, you'll answer questions about your smartphone habits and preferences.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Complete mobile usage surveys</li>
+      <li>Share honest feedback on apps and devices</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Own a smartphone</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$2-$7 per survey, paid after completion.</p>
+    <h2>How to Apply</h2>
+    <p>Sign up and complete your mobile profile.</p>
+  `,
+  payRange: "$2-$7 per survey",
+  requirements: "Smartphone, internet",
+  estimatedTime: "5-10 minutes per survey",
+},
+"survey-015": {
+  title: "Fitness & Wellness Surveyor",
+  description: "Answer surveys about fitness routines and wellness products.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Fitness & Wellness Surveyor, you'll help companies improve health products and services.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Complete fitness and wellness surveys</li>
+      <li>Share honest feedback on routines and products</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Interest in fitness/wellness</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$3-$10 per survey, paid monthly.</p>
+    <h2>How to Apply</h2>
+    <p>Register and start participating in surveys.</p>
+  `,
+  payRange: "$3-$10 per survey",
+  requirements: "Interest in fitness, internet",
+  estimatedTime: "10-20 minutes per survey",
+},
+"survey-016": {
+  title: "Entertainment Surveyor",
+  description: "Share your opinions on movies, TV, and streaming services.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As an Entertainment Surveyor, you'll answer questions about your viewing habits and preferences.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Complete entertainment-related surveys</li>
+      <li>Share honest feedback on shows and platforms</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Interest in movies/TV</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$2-$8 per survey, paid after completion.</p>
+    <h2>How to Apply</h2>
+    <p>Sign up and complete your entertainment profile.</p>
+  `,
+  payRange: "$2-$8 per survey",
+  requirements: "Interest in entertainment, internet",
+  estimatedTime: "5-15 minutes per survey",
+},
+"survey-017": {
+  title: "Shopping Habits Surveyor",
+  description: "Answer surveys about your shopping preferences and habits.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Shopping Habits Surveyor, you'll help retailers understand consumer trends.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Complete shopping-related surveys</li>
+      <li>Share honest feedback on products and stores</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Interest in shopping</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$3-$9 per survey, paid monthly.</p>
+    <h2>How to Apply</h2>
+    <p>Register and start participating in surveys.</p>
+  `,
+  payRange: "$3-$9 per survey",
+  requirements: "Interest in shopping, internet",
+  estimatedTime: "5-15 minutes per survey",
+},
+"survey-018": {
+  title: "Pet Owner Surveyor",
+  description: "Share your experiences as a pet owner in online surveys.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Pet Owner Surveyor, you'll answer questions about pet care, products, and services.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Complete pet-related surveys</li>
+      <li>Share honest feedback on pet products and services</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Own a pet</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$4-$10 per survey, paid after completion.</p>
+    <h2>How to Apply</h2>
+    <p>Sign up and complete your pet profile.</p>
+  `,
+  payRange: "$4-$10 per survey",
+  requirements: "Pet owner, internet",
+  estimatedTime: "10-20 minutes per survey",
+},
+"survey-019": {
+  title: "Parenting Surveyor",
+  description: "Participate in surveys about parenting and family life.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Parenting Surveyor, you'll help companies understand family needs and preferences.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Complete parenting-related surveys</li>
+      <li>Share honest feedback on family products and services</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Parent or guardian</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$5-$12 per survey, paid monthly.</p>
+    <h2>How to Apply</h2>
+    <p>Register and start participating in surveys.</p>
+  `,
+  payRange: "$5-$12 per survey",
+  requirements: "Parent/guardian, internet",
+  estimatedTime: "10-20 minutes per survey",
+},
+"survey-020": {
+  title: "Student Surveyor",
+  description: "Share your experiences as a student in online surveys.",
+  fullDescription: `
+    <h2>Job Overview</h2>
+    <p>As a Student Surveyor, you'll answer questions about your education and student life.</p>
+    <h2>Responsibilities</h2>
+    <ul>
+      <li>Complete student-related surveys</li>
+      <li>Share honest feedback on educational products and services</li>
+    </ul>
+    <h2>Requirements</h2>
+    <ul>
+      <li>Currently enrolled student</li>
+      <li>Internet access</li>
+    </ul>
+    <h2>Payment Details</h2>
+    <p>$3-$8 per survey, paid after completion.</p>
+    <h2>How to Apply</h2>
+    <p>Sign up and complete your student profile.</p>
+  `,
+  payRange: "$3-$8 per survey",
+  requirements: "Student, internet",
+  estimatedTime: "5-15 minutes per survey",
+},
+}   
 export default function JobsPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
