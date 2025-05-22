@@ -276,7 +276,7 @@ const jobData: Record<string, Job> = {
   estimatedTime: "10-20 minutes per survey",
 }
 
-}export default function JobsPage() {
+export default function JobsPage() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
