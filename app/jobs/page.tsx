@@ -1,14 +1,11 @@
 "use client"
 
-import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import { useParams, useRouter } from "next/navigation"
-import { useEffect, useState, FormEvent } from "react"
+import { useEffect, useState } from "react"
 import { User, onAuthStateChanged } from "firebase/auth"
 import { auth } from "@/lib/firebase"
-
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 type Job = {
   title: string
@@ -271,52 +268,30 @@ const jobData: Record<string, Job> = {
     payRange: "$4-$12 per survey",
     requirements: "Internet access, student or parent",
     estimatedTime: "10-20 minutes per survey",
-}
+  }
+} // <-- No trailing comma here!
 
 export default function JobsPage() {
-  const params = useParams()
-  const router = useRouter()
-  const [job, setJob] = useState<Job | null>(null)
-  const [isActivated, setIsActivated] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const jobId = params.id as string
   const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser)
+      setLoading(false)
     })
-
-    const activationStatus = localStorage.getItem("account_activated")
-    if (activationStatus === "true") setIsActivated(true)
-    if (jobData[jobId]) setJob(jobData[jobId])
-    else router.push("/jobs")
-    setLoading(false)
-
     return () => unsubscribe()
-  }, [jobId, router])
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    alert("Application submitted!")
-    // Add your submission logic here
-  }
+  }, [])
 
   if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto text-center">
-          <p>Loading job details...</p>
-        </div>
-      </div>
-    )
+    return <div className="text-center py-12">Loading...</div>
   }
 
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-12 text-center">
         <h2 className="text-2xl font-semibold mb-4">Sign In Required</h2>
-        <p className="mb-4">You must be signed in to view job listings.</p>
+        <p className="mb-4">You must be signed in to browse jobs.</p>
         <Link href="/login">
           <Button>Sign In</Button>
         </Link>
@@ -324,190 +299,26 @@ export default function JobsPage() {
     )
   }
 
-  if (!job) return null
-
-  // Show payment/activation if not activated
-  if (!isActivated) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          <Link href="/jobs" className="inline-flex items-center text-sm mb-6 hover:underline">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to all jobs
-          </Link>
-          <Card>
+  return (
+    <div className="container mx-auto px-4 py-12">
+      <h1 className="text-3xl font-bold mb-8">Browse Jobs</h1>
+      <div className="grid gap-6 md:grid-cols-2">
+        {Object.entries(jobData).map(([id, job]) => (
+          <Card key={id}>
             <CardHeader>
-              <CardTitle className="text-2xl">{job.title}</CardTitle>
+              <CardTitle>{job.title}</CardTitle>
               <CardDescription>{job.description}</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid gap-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="font-medium text-sm mb-1">Pay Range</h3>
-                    <p>{job.payRange}</p>
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-sm mb-1">Time Commitment</h3>
-                    <p>{job.estimatedTime}</p>
-                  </div>
-                </div>
-                <div className="bg-muted p-6 rounded-lg border text-center">
-                  <h2 className="text-xl font-semibold mb-2">Account Activation Required</h2>
-                  <p className="mb-4">
-                    To view complete job details and apply for this position, please activate your account with a one-time payment.
-                  </p>
-                  {/* PayPal Payment Button */}
-                  <form
-                    action="https://www.paypal.com/ncp/payment/8M4GB5JBDTP9U"
-                    method="post"
-                    target="_blank"
-                    style={{
-                      display: "inline-grid",
-                      justifyItems: "center",
-                      alignContent: "start",
-                      gap: "0.5rem",
-                    }}
-                  >
-                    <input
-                      className="pp-8M4GB5JBDTP9U"
-                      type="submit"
-                      value="Buy Now"
-                      style={{
-                        textAlign: "center",
-                        border: "none",
-                        borderRadius: "0.25rem",
-                        minWidth: "11.625rem",
-                        padding: "0 2rem",
-                        height: "2.625rem",
-                        fontWeight: "bold",
-                        backgroundColor: "#FFD140",
-                        color: "#000000",
-                        fontFamily: '"Helvetica Neue",Arial,sans-serif',
-                        fontSize: "1rem",
-                        lineHeight: "1.25rem",
-                        cursor: "pointer",
-                      }}
-                    />
-                    <img src="https://www.paypalobjects.com/images/Debit_Credit.svg" alt="cards" />
-                    <section style={{ fontSize: "0.75rem" }}>
-                      Powered by{" "}
-                      <img
-                        src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg"
-                        alt="paypal"
-                        style={{ height: "0.875rem", verticalAlign: "middle" }}
-                      />
-                    </section>
-                  </form>
-                  <div className="mt-4 text-sm text-muted-foreground">
-                    After payment, your account will be activated and you can view all job details and apply.
-                  </div>
-                </div>
+              <div className="mb-4">
+                <span className="font-medium">Pay Range:</span> {job.payRange}
               </div>
+              <Link href={`/jobs/${id}`}>
+                <Button>View Details</Button>
+              </Link>
             </CardContent>
           </Card>
-        </div>
-      </div>
-    )
-  }
-
-  // Show job details if activated
-  return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="max-w-4xl mx-auto">
-        <Link href="/jobs" className="inline-flex items-center text-sm mb-6 hover:underline">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to all jobs
-        </Link>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">{job.title}</CardTitle>
-            <CardDescription>{job.description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h3 className="font-medium text-sm mb-1">Pay Range</h3>
-                  <p>{job.payRange}</p>
-                </div>
-                <div>
-                  <h3 className="font-medium text-sm mb-1">Time Commitment</h3>
-                  <p>{job.estimatedTime}</p>
-                </div>
-              </div>
-              <div dangerouslySetInnerHTML={{ __html: job.fullDescription }} className="prose max-w-none" />
-              <div className="mt-6">
-                <h2 className="text-xl font-semibold mb-4">Apply for this Position</h2>
-                <form className="space-y-4" onSubmit={handleSubmit}>
-                  <div className="grid gap-2">
-                    <label htmlFor="name" className="text-sm font-medium">
-                      Full Name
-                    </label>
-                    <input
-                      id="name"
-                      type="text"
-                      className="w-full p-2 border rounded-md"
-                      placeholder="Enter your full name"
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <label htmlFor="email" className="text-sm font-medium">
-                      Email Address
-                    </label>
-                    <input
-                      id="email"
-                      type="email"
-                      className="w-full p-2 border rounded-md"
-                      placeholder="Enter your email address"
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <label htmlFor="phone" className="text-sm font-medium">
-                      Phone Number
-                    </label>
-                    <input
-                      id="phone"
-                      type="tel"
-                      className="w-full p-2 border rounded-md"
-                      placeholder="Enter your phone number"
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <label htmlFor="experience" className="text-sm font-medium">
-                      Relevant Experience
-                    </label>
-                    <textarea
-                      id="experience"
-                      className="w-full p-2 border rounded-md min-h-[100px]"
-                      placeholder="Describe any relevant experience you have"
-                      required
-                    />
-                  </div>
-                  {jobId === "transcription-specialist-001" && (
-                    <div className="grid gap-2">
-                      <label htmlFor="transcription-sample" className="text-sm font-medium">
-                        Transcription Sample
-                      </label>
-                      <textarea
-                        id="transcription-sample"
-                        className="w-full p-2 border rounded-md min-h-[100px]"
-                        placeholder="Submit a short transcription sample"
-                        required
-                      />
-                    </div>
-                  )}
-                  <Button type="submit" className="w-full">
-                    Submit Application
-                  </Button>
-                </form>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        ))}
       </div>
     </div>
   )
