@@ -14,7 +14,15 @@ type Job = {
   payRange: string
   requirements: string
   estimatedTime: string
-}
+}}
+
+  const jobsByCategory: Record<string, Job[]> = {}
+Object.entries(jobData).forEach(([id, job]) => {
+  if (!jobsByCategory[job.category]) {
+    jobsByCategory[job.category] = []
+  }
+  jobsByCategory[job.category].push({ ...job, id })
+})
  const jobData: Record<string, Job> = {
   "survey-tester-001": {
     title: "Product Tester",
@@ -1004,9 +1012,7 @@ export default function JobsPage() {
         </Link>
       </div>
     )
-  }
-
-  return (
+return (
   <div className="container mx-auto px-4 py-12">
     <h1 className="text-3xl font-bold mb-8">Browse Jobs</h1>
     {Object.entries(jobsByCategory).map(([category, jobs]) => (
