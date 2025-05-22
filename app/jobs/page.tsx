@@ -1007,26 +1007,30 @@ export default function JobsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-8">Browse Jobs</h1>
-      <div className="grid gap-6 md:grid-cols-2">
-        {Object.entries(jobData).map(([id, job]) => (
-          <Card key={id}>
-            <CardHeader>
-              <CardTitle>{job.title}</CardTitle>
-              <CardDescription>{job.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-4">
-                <span className="font-medium">Pay Range:</span> {job.payRange}
-              </div>
-              <Link href={`/apply/${id}`}>
-                <Button>View Details</Button>
-              </Link>
-            </CardContent>
-          </Card>
-        ))}
+  <div className="container mx-auto px-4 py-12">
+    <h1 className="text-3xl font-bold mb-8">Browse Jobs</h1>
+    {Object.entries(jobsByCategory).map(([category, jobs]) => (
+      <div key={category} className="mb-10">
+        <h2 className="text-2xl font-semibold mb-4">{category}</h2>
+        <div className="grid gap-6 md:grid-cols-2">
+          {jobs.map((job) => (
+            <Card key={job.id}>
+              <CardHeader>
+                <CardTitle>{job.title}</CardTitle>
+                <CardDescription>{job.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4">
+                  <span className="font-medium">Pay Range:</span> {job.payRange}
+                </div>
+                <Link href={`/apply/${job.id}`}>
+                  <Button>View Details</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
-    </div>
-  )
-}
+    ))}
+  </div>
+)
