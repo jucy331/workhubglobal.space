@@ -105,7 +105,7 @@ const jobData: Record<string, Job> = {
     requirements: "Good listening skills, typing speed (min. 50 WPM), attention to detail",
     estimatedTime: "Varies by project",
   },
-  {"survey-004": {
+  "survey-004": {
   title: "Brand Awareness Surveyor",
   description: "Help brands measure their reach by answering simple surveys.",
   fullDescription: `
