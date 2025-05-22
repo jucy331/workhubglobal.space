@@ -236,8 +236,10 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+    )}
   </>
 )}
+// ...existing code...
             </CardContent>
           </Card>
         </div>
