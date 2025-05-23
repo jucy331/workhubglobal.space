@@ -12,9 +12,23 @@ import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/contexts/auth-context"
+import { useEffect, useState } from "react"
 
 export function UserAccountDropdown() {
   const { userProfile, logout, user } = useAuth()
+  const [userData, setUserData] = useState<{ name: string; email: string } | null>(null)
+
+  useEffect(() => {
+    // Try to get user data from localStorage as fallback
+    try {
+      const storedData = localStorage.getItem("user_data")
+      if (storedData) {
+        setUserData(JSON.parse(storedData))
+      }
+    } catch (error) {
+      console.error("Error reading user data from localStorage:", error)
+    }
+  }, [])
 
   // Get initials from user's full name
   const getInitials = (name: string) => {
@@ -28,9 +42,9 @@ export function UserAccountDropdown() {
       .substring(0, 2)
   }
 
-  // Use userProfile.fullName, user.displayName, or fallback
-  const displayName = userProfile?.fullName || user?.displayName || "Account"
-  const displayEmail = userProfile?.email || user?.email || ""
+  // Use userProfile.fullName, user.displayName, localStorage data, or fallback
+  const displayName = userProfile?.fullName || user?.displayName || userData?.name || "Account"
+  const displayEmail = userProfile?.email || user?.email || userData?.email || ""
   const initials = getInitials(displayName)
 
   const handleLogout = async () => {
@@ -39,11 +53,6 @@ export function UserAccountDropdown() {
     } catch (error) {
       console.error("Error logging out:", error)
     }
-  }
-
-  // Don't render if no user data
-  if (!userProfile && !user) {
-    return null
   }
 
   return (
@@ -93,12 +102,6 @@ export function UserAccountDropdown() {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/account" className="flex w-full cursor-pointer items-center">
-            <User className="mr-3 h-4 w-4 text-gray-500" />
-            <span>My Account</span>
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
           <Link href="/dashboard" className="flex w-full cursor-pointer items-center">
             <LayoutDashboard className="mr-3 h-4 w-4 text-gray-500" />
             <span>Dashboard</span>
@@ -108,6 +111,12 @@ export function UserAccountDropdown() {
           <Link href="/applications" className="flex w-full cursor-pointer items-center">
             <FileText className="mr-3 h-4 w-4 text-gray-500" />
             <span>My Applications</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/account" className="flex w-full cursor-pointer items-center">
+            <User className="mr-3 h-4 w-4 text-gray-500" />
+            <span>My Account</span>
           </Link>
         </DropdownMenuItem>
         {!userProfile?.isActivated && (
@@ -122,7 +131,7 @@ export function UserAccountDropdown() {
         <DropdownMenuItem asChild>
           <Link href="/settings" className="flex w-full cursor-pointer items-center">
             <Settings className="mr-3 h-4 w-4 text-gray-500" />
-            <span>Settings</span>
+            <span>Profile Settings</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />

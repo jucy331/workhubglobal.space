@@ -1,15 +1,42 @@
-"use client";
+"use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Menu, X, Briefcase } from "lucide-react"
 import { UserAccountDropdown } from "./user-account-dropdown"
 import { useAuth } from "@/contexts/auth-context"
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 
 export function Header() {
   const { user, userProfile, loading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+  useEffect(() => {
+    // Check authentication from multiple sources
+    const checkAuth = () => {
+      // Check auth context
+      if (user || userProfile) {
+        setIsAuthenticated(true)
+        return
+      }
+
+      // Fallback to localStorage
+      try {
+        const userData = localStorage.getItem("user_data")
+        if (userData) {
+          setIsAuthenticated(true)
+          return
+        }
+      } catch (error) {
+        console.error("Error reading from localStorage:", error)
+      }
+
+      setIsAuthenticated(false)
+    }
+
+    checkAuth()
+  }, [user, userProfile])
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
@@ -34,6 +61,15 @@ export function Header() {
               Jobs
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
             </Link>
+            {isAuthenticated && (
+              <Link
+                href="/dashboard"
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors relative group"
+              >
+                Dashboard
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
+              </Link>
+            )}
             <Link
               href="/faq"
               className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors relative group"
@@ -52,7 +88,7 @@ export function Header() {
 
           {/* User Account / Sign In */}
           <div className="flex items-center space-x-4">
-            {!loading && (user || userProfile) ? (
+            {isAuthenticated ? (
               <UserAccountDropdown />
             ) : (
               <div className="flex items-center space-x-2">
@@ -93,7 +129,7 @@ export function Header() {
               >
                 Jobs
               </Link>
-              {(user || userProfile) && (
+              {isAuthenticated && (
                 <Link
                   href="/dashboard"
                   className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-2 py-1"
@@ -116,7 +152,7 @@ export function Header() {
               >
                 Support
               </Link>
-              {!(user || userProfile) && (
+              {!isAuthenticated && (
                 <div className="flex flex-col space-y-2 pt-2 border-t border-gray-200">
                   <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
                     <Button variant="ghost" size="sm" className="w-full justify-start">
