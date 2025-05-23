@@ -19,6 +19,7 @@ const app = apps.length ? apps[0] : initializeApp(firebaseConfig)
 // Initialize Firebase services
 export const auth = getAuth(app)
 export const db = getFirestore(app)
+export const storage = getStorage(app)
 
 // Connect to Firebase emulators if enabled
 if (process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATORS === "true") {
