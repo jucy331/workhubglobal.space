@@ -1,39 +1,11 @@
 "use client"
 
 import Link from "next/link"
-import { useState, useEffect } from "react"
 import { UserAccountDropdown } from "./user-account-dropdown"
+import { useAuth } from "@/contexts/auth-context"
 
-export default function Header() {
-  const [user, setUser] = useState<{ name: string; email: string; isActivated: boolean } | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // Check if user is logged in
-    const checkUserLoggedIn = () => {
-      // In a real app, this would check with your auth system
-      // For demo purposes, we'll simulate a logged in user
-      const mockUser = {
-        name: "John Doe",
-        email: "john.doe@example.com",
-        isActivated: localStorage.getItem("account_activated") === "true",
-      }
-
-      setUser(mockUser)
-      setLoading(false)
-    }
-
-    checkUserLoggedIn()
-  }, [])
-
-  const handleLogout = () => {
-    // In a real app, this would call your logout API
-    console.log("Logging out...")
-    // For demo purposes, we'll just clear localStorage
-    localStorage.removeItem("account_activated")
-    // Redirect to login page
-    window.location.href = "/login"
-  }
+export function Header() {
+  const { user, isLoading } = useAuth()
 
   return (
     <header className="border-b bg-white">
@@ -55,8 +27,8 @@ export default function Header() {
         </nav>
 
         <div className="flex items-center space-x-4">
-          {!loading && user ? (
-            <UserAccountDropdown user={user} onLogout={handleLogout} />
+          {!isLoading && user ? (
+            <UserAccountDropdown />
           ) : (
             <Link href="/login">
               <button className="rounded-md bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800">

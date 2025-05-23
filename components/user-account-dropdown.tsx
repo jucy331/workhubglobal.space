@@ -10,19 +10,50 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useAuth } from "@/contexts/auth-context"
+import { useEffect, useState } from "react"
 
-interface UserAccountDropdownProps {
-  user: {
+export function UserAccountDropdown() {
+  const { user, logout } = useAuth()
+  const [userData, setUserData] = useState<{
     name: string
     email: string
     isActivated?: boolean
-  }
-  onLogout: () => void
-}
+  }>({
+    name: "Account",
+    email: "",
+    isActivated: false,
+  })
 
-export function UserAccountDropdown({ user, onLogout }: UserAccountDropdownProps) {
+  useEffect(() => {
+    // Try to get user data from localStorage
+    try {
+      const storedUserData = localStorage.getItem("user_data")
+      const isActivated = localStorage.getItem("account_activated") === "true"
+
+      if (storedUserData) {
+        const parsedData = JSON.parse(storedUserData)
+        setUserData({
+          ...parsedData,
+          isActivated,
+        })
+      } else if (user) {
+        // If no stored data but we have auth user
+        setUserData({
+          name: user.displayName || "Account",
+          email: user.email || "",
+          isActivated,
+        })
+      }
+    } catch (e) {
+      console.error("Failed to parse user data", e)
+    }
+  }, [user])
+
   // Get initials from user name
   const getInitials = (name: string) => {
+    if (!name || typeof name !== "string") return "AC"
+
     return name
       .split(" ")
       .map((n) => n[0])
@@ -31,7 +62,20 @@ export function UserAccountDropdown({ user, onLogout }: UserAccountDropdownProps
       .substring(0, 2)
   }
 
-  const initials = getInitials(user.name)
+  const initials = getInitials(userData.name)
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      // Clear localStorage data
+      localStorage.removeItem("user_data")
+      localStorage.removeItem("account_activated")
+      // Redirect to login page
+      window.location.href = "/login"
+    } catch (error) {
+      console.error("Error logging out:", error)
+    }
+  }
 
   return (
     <DropdownMenu>
@@ -44,8 +88,8 @@ export function UserAccountDropdown({ user, onLogout }: UserAccountDropdownProps
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <div className="flex flex-col space-y-1 p-2">
-          <p className="text-sm font-medium">{user.name}</p>
-          <p className="text-xs text-muted-foreground">{user.email}</p>
+          <p className="text-sm font-medium">{userData.name}</p>
+          <p className="text-xs text-muted-foreground">{userData.email}</p>
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
@@ -66,7 +110,7 @@ export function UserAccountDropdown({ user, onLogout }: UserAccountDropdownProps
             <span>My Applications</span>
           </Link>
         </DropdownMenuItem>
-        {!user.isActivated && (
+        {!userData.isActivated && (
           <DropdownMenuItem asChild>
             <Link href="/activate" className="flex w-full cursor-pointer items-center">
               <CheckCircle className="mr-2 h-4 w-4" />
@@ -83,7 +127,7 @@ export function UserAccountDropdown({ user, onLogout }: UserAccountDropdownProps
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="flex cursor-pointer items-center text-red-500 focus:text-red-500"
-          onClick={onLogout}
+          onClick={handleLogout}
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log Out</span>

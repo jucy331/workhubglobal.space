@@ -30,9 +30,19 @@ export default function LoginPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
+      // Store user data in localStorage for the account dropdown
+      if (user.displayName) {
+        localStorage.setItem(
+          "user_data",
+          JSON.stringify({
+            name: user.displayName,
+            email: user.email || formData.email,
+          }),
+        )
+      }
       router.push(redirectUrl)
     }
-  }, [user, router, redirectUrl])
+  }, [user, router, redirectUrl, formData.email])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -61,6 +71,18 @@ export default function LoginPage() {
     try {
       console.log("Attempting login with:", { email: formData.email })
       await login(formData.email, formData.password)
+
+      // If in preview mode, store mock user data for the dropdown
+      if (isPreview) {
+        localStorage.setItem(
+          "user_data",
+          JSON.stringify({
+            name: "Demo User",
+            email: formData.email,
+          }),
+        )
+      }
+
       router.push(redirectUrl)
     } catch (error: any) {
       console.error("Error logging in:", error)
