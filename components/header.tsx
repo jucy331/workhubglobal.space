@@ -5,9 +5,9 @@ import { useState } from "react"
 import { Menu, X, Briefcase } from "lucide-react"
 import { UserAccountDropdown } from "./user-account-dropdown"
 import { useAuth } from "@/contexts/auth-context"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button
 
-export function Header() {
+export Header() {
   const { user, userProfile, loading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
