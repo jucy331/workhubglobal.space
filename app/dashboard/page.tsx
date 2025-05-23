@@ -22,9 +22,7 @@ export default function DashboardPage() {
     activeJobs: 0,
   })
 
-  const recentApplications = [
-    {0},
-  ]
+  const recentApplications = []
 
   if (loading) {
     return (
@@ -207,7 +205,7 @@ export default function DashboardPage() {
                 <span>Profile Completion</span>
                 <span>0%</span>
               </div>
-              <Progress value={85} />
+              <Progress value={0} />
             </div>
 
             <div className="grid grid-cols-2 gap-4 pt-4">
