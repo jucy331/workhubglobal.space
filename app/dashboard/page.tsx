@@ -12,17 +12,50 @@ import Link from "next/link"
 export default function DashboardPage() {
   const { userProfile, loading } = useAuth()
   const [stats, setStats] = useState({
-    applicationsSubmitted: 0,
-    applicationsAccepted: 0,
-    totalEarnings: 0.0,
-    currentWeekEarnings: 0.0,
-    completedJobs: 0,
-    averageRating: 0,
-    hoursWorked: 0,
-    activeJobs: 0,
+    applicationsSubmitted: 12,
+    applicationsAccepted: 8,
+    totalEarnings: 245.5,
+    currentWeekEarnings: 67.25,
+    completedJobs: 15,
+    averageRating: 4.8,
+    hoursWorked: 42,
+    activeJobs: 3,
   })
 
-  const recentApplications = []
+  const recentApplications = [
+    {
+      id: "1",
+      jobTitle: "Product Survey Tester",
+      company: "Market Research Co.",
+      status: "accepted",
+      appliedDate: "2024-01-15",
+      earnings: 45.0,
+    },
+    {
+      id: "2",
+      jobTitle: "AI Training Data Specialist",
+      company: "TechCorp AI",
+      status: "pending",
+      appliedDate: "2024-01-14",
+      earnings: 0,
+    },
+    {
+      id: "3",
+      jobTitle: "Virtual Assistant",
+      company: "StartupXYZ",
+      status: "completed",
+      appliedDate: "2024-01-12",
+      earnings: 120.0,
+    },
+    {
+      id: "4",
+      jobTitle: "Content Moderator",
+      company: "Social Platform Inc.",
+      status: "in_progress",
+      appliedDate: "2024-01-10",
+      earnings: 80.5,
+    },
+  ]
 
   if (loading) {
     return (
@@ -195,17 +228,17 @@ export default function DashboardPage() {
             <div>
               <div className="flex justify-between text-sm mb-2">
                 <span>Application Success Rate</span>
-                <span>{Math.round((stats.applicationsAccepted / stats.applicationsSubmitted) * 0)}%</span>
+                <span>{Math.round((stats.applicationsAccepted / stats.applicationsSubmitted) * 100)}%</span>
               </div>
-              <Progress value={(stats.applicationsAccepted / stats.applicationsSubmitted) * 0} />
+              <Progress value={(stats.applicationsAccepted / stats.applicationsSubmitted) * 100} />
             </div>
 
             <div>
               <div className="flex justify-between text-sm mb-2">
                 <span>Profile Completion</span>
-                <span>0%</span>
+                <span>85%</span>
               </div>
-              <Progress value={0} />
+              <Progress value={85} />
             </div>
 
             <div className="grid grid-cols-2 gap-4 pt-4">
