@@ -1,7 +1,7 @@
 import { initializeApp, getApps } from "firebase/app"
 import { getAuth, connectAuthEmulator } from "firebase/auth"
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore"
-
+import { getStorage } from "firebase/storage"  
 // Update the Firebase configuration with the provided values
 const firebaseConfig = {
   apiKey: "AIzaSyC5n1Bc2bLmZpKmjweMYu9w6mbRTl-66Qs",
