@@ -140,27 +140,27 @@ export default function AccountPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center pb-2 border-b">
                     <div className="text-gray-600">Total Applications</div>
-                    <div className="font-medium">12</div>
+                    <div className="font-medium">0</div>
                   </div>
 
                   <div className="flex justify-between items-center pb-2 border-b">
                     <div className="text-gray-600">Accepted Applications</div>
-                    <div className="font-medium">8</div>
+                    <div className="font-medium">0</div>
                   </div>
 
                   <div className="flex justify-between items-center pb-2 border-b">
                     <div className="text-gray-600">Completed Jobs</div>
-                    <div className="font-medium">15</div>
+                    <div className="font-medium">0</div>
                   </div>
 
                   <div className="flex justify-between items-center pb-2 border-b">
                     <div className="text-gray-600">Total Earnings</div>
-                    <div className="font-medium text-green-600">$245.50</div>
+                    <div className="font-medium text-green-600">$0.0</div>
                   </div>
 
                   <div className="flex justify-between items-center pb-2 border-b">
                     <div className="text-gray-600">Average Rating</div>
-                    <div className="font-medium">4.8/5.0</div>
+                    <div className="font-medium">0.0</div>
                   </div>
                 </div>
 
