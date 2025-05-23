@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
 import Link from "next/link"
 import { useState } from "react"
 import { Menu, X, Briefcase } from "lucide-react"
 import { UserAccountDropdown } from "./user-account-dropdown"
 import { useAuth } from "@/contexts/auth-context"
-import { Button } from "@/components/ui/button
+import { Button } from "@/components/ui/button;
 
-export Header() {
+export function Header() {
   const { user, userProfile, loading } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
