@@ -1,10 +1,25 @@
 "use client"
 
-import { useAuth } from "@/contexts/auth-context"
-import { User, Mail, CheckCircle, Crown } from "lucide-react"
+import React from "react";
+import { User, Mail, CheckCircle, Crown } from "lucide-react";
+
+// Mocking useAuth context
+const useMockAuth = () => ({
+  userProfile: {
+    fullName: "Jane Doe",
+    email: "jane.doe@example.com",
+    isActivated: true,
+  },
+  user: {
+    displayName: "JaneD",
+    email: "jane.d@example.com",
+  }
+});
+
+const useAuth = useMockAuth;
 
 export default function AccountPage() {
-  const { userProfile, user } = useAuth()
+  const { userProfile, user } = useAuth();
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
@@ -17,7 +32,7 @@ export default function AccountPage() {
           <div className="rounded-full bg-gradient-to-br from-blue-500 to-purple-600 h-16 w-16 flex items-center justify-center text-white text-2xl font-bold">
             {(userProfile?.fullName || user?.displayName || "AC")
               .split(" ")
-              .map((n) => n[0])
+              .map(n => n[0])
               .join("")
               .toUpperCase()
               .substring(0, 2)}
@@ -61,5 +76,5 @@ export default function AccountPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -266,22 +266,30 @@ export default function JobDetailPage() {
   const jobId = params.id as string
 
   useEffect(() => {
-    // Check if account is activated
-    const activationStatus = localStorage.getItem("account_activated")
-    if (activationStatus === "true") {
-      setIsActivated(true)
-    }
+  console.log("params:", params)
 
-    // Get job data
-    if (jobData[jobId]) {
-      setJob(jobData[jobId])
-    } else {
-      // Job not found
-      router.push("/jobs")
-    }
+  if (!params?.id) {
+    console.error("Missing job ID in URL")
+    router.push("/jobs")
+    return
+  }
 
-    setLoading(false)
-  }, [jobId, router])
+  const activationStatus = localStorage.getItem("account_activated")
+  if (activationStatus === "true") {
+    setIsActivated(true)
+  }
+
+  const jobId = params.id as string
+
+  if (jobData[jobId]) {
+    setJob(jobData[jobId])
+  } else {
+    console.warn("Job not found:", jobId)
+    router.push("/jobs")
+  }
+
+  setLoading(false)
+}, [params, router])
 
   const handlePaymentRedirect = () => {
     // Store the job ID in sessionStorage so we can retrieve it when the user returns

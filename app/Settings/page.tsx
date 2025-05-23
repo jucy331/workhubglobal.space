@@ -1,22 +1,31 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Settings, Mail } from "lucide-react"
 
+// Fallback Button component
+const Button = ({ children, ...props }) => (
+  <button
+    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+    {...props}
+  >
+    {children}
+  </button>
+);
+
 export default function SettingsPage() {
-  const [emailNotifications, setEmailNotifications] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
-    setSaving(true)
+    setSaving(true);
     setTimeout(() => {
-      setSaving(false)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
-    }, 1000)
-  }
+      setSaving(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }, 1000);
+  };
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
@@ -48,5 +57,5 @@ export default function SettingsPage() {
         {saved && <div className="text-green-600 text-sm">Settings saved!</div>}
       </div>
     </div>
-  )
+  );
 }

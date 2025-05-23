@@ -15,7 +15,6 @@ const statusIcons: Record<string, JSX.Element> = {
 }
 
 export default function ApplicationsPage() {
-  // Replace with your real data fetching logic
   const applications = [
     { id: "1", job: "Product Survey Tester", status: "Pending", date: "2025-05-20" },
     { id: "2", job: "AI Training Data Specialist", status: "Accepted", date: "2025-05-10" },
