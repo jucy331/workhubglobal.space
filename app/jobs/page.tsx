@@ -286,35 +286,44 @@ export default function JobsPage() {
 
   useEffect(() => {
     setIsClient(true)
+   
+  // --- Require sign-in to access this page ---
+  const signedIn = localStorage.getItem("user_signed_in");
+  if (signedIn !== "true") {
+    // Redirect to sign-in page if not signed in
+    router.push("/signin");
+    return;
+  }
+  // --- end sign-in check ---
 
-    // Check if account is activated
-    const activationStatus = localStorage.getItem("account_activated")
-    if (activationStatus === "true") {
-      setIsActivated(true)
+  // Check if account is activated
+  const activationStatus = localStorage.getItem("account_activated");
+  if (activationStatus === "true") {
+    setIsActivated(true);
+  }
+
+  // Check if returning from payment
+  const urlParams = new URLSearchParams(window.location.search);
+  const paymentStatus = urlParams.get("payment_status");
+
+  if (paymentStatus === "success") {
+    // Activate account
+    localStorage.setItem("account_activated", "true");
+    setIsActivated(true);
+
+    // If there was a pending job, redirect to it
+    const pendingJobId = sessionStorage.getItem("pending_job_id");
+    if (pendingJobId) {
+      sessionStorage.removeItem("pending_job_id");
+      router.push(`/job/${pendingJobId}`);
     }
 
-    // Check if returning from payment
-    const urlParams = new URLSearchParams(window.location.search)
-    const paymentStatus = urlParams.get("payment_status")
-
-    if (paymentStatus === "success") {
-      // Activate account
-      localStorage.setItem("account_activated", "true")
-      setIsActivated(true)
-
-      // If there was a pending job, redirect to it
-      const pendingJobId = sessionStorage.getItem("pending_job_id")
-      if (pendingJobId) {
-        sessionStorage.removeItem("pending_job_id")
-        router.push(`/job/${pendingJobId}`)
-      }
-
-      toast({
-        title: "Account Activated! 🎉",
-        description: "Your account has been successfully activated. You now have access to all job details.",
-      })
-    }
-  }, [toast, router])
+    toast({
+      title: "Account Activated! 🎉",
+      description: "Your account has been successfully activated. You now have access to all job details.",
+    });
+  }
+}, [toast, router]);
 
   const handleViewDetails = (jobId: string) => {
     if (isActivated) {
