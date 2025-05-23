@@ -101,7 +101,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               const userDoc = await getDoc(doc(db, "users", user.uid))
               if (userDoc.exists()) {
                 console.log("User profile found")
-                setUserProfile(userDoc.data() as UserProfile)
+                const profile = userDoc.data() as UserProfile
+                setUserProfile(profile)
+
+                // Store user data in localStorage for consistent access across components
+                localStorage.setItem(
+                  "user_data",
+                  JSON.stringify({
+                    name: profile.fullName,
+                    email: profile.email,
+                  }),
+                )
+
+                // Store activation status
+                localStorage.setItem("account_activated", profile.isActivated.toString())
               } else {
                 console.log("No user profile found in Firestore")
               }
@@ -113,6 +126,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         } else {
           setUserProfile(null)
+          // Clear localStorage when user logs out
+          localStorage.removeItem("user_data")
+          localStorage.removeItem("account_activated")
         }
 
         setLoading(false)
@@ -147,6 +163,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       setUserProfile(mockProfile)
+
+      // Store in localStorage for consistency
+      localStorage.setItem(
+        "user_data",
+        JSON.stringify({
+          name: fullName,
+          email,
+        }),
+      )
+      localStorage.setItem("account_activated", "false")
+
       return
     }
 
@@ -179,6 +206,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await setDoc(doc(db, "users", user.uid), userProfile)
       setUserProfile(userProfile)
 
+      // Store in localStorage for consistency
+      localStorage.setItem(
+        "user_data",
+        JSON.stringify({
+          name: fullName,
+          email,
+        }),
+      )
+      localStorage.setItem("account_activated", "false")
+
       return
     } catch (error) {
       console.error("Error signing up:", error)
@@ -205,6 +242,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       setUserProfile(mockProfile)
+
+      // Store in localStorage for consistency
+      localStorage.setItem(
+        "user_data",
+        JSON.stringify({
+          name: "Preview User",
+          email,
+        }),
+      )
+      localStorage.setItem("account_activated", "true")
+
       return
     }
 
@@ -227,6 +275,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (isPreview) {
       console.log("Logout called in preview mode")
       setUserProfile(null)
+      localStorage.removeItem("user_data")
+      localStorage.removeItem("account_activated")
       router.push("/")
       return
     }
@@ -247,7 +297,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const updateUserProfile = async (data: Partial<UserProfile>) => {
     if (isPreview) {
       console.log("Update profile called in preview mode with:", data)
-      setUserProfile((prev) => (prev ? { ...prev, ...data } : null))
+      const updatedProfile = userProfile ? { ...userProfile, ...data } : null
+      setUserProfile(updatedProfile)
+
+      // Update localStorage if fullName or email changed
+      if (updatedProfile && (data.fullName || data.email)) {
+        localStorage.setItem(
+          "user_data",
+          JSON.stringify({
+            name: updatedProfile.fullName,
+            email: updatedProfile.email,
+          }),
+        )
+      }
+
+      // Update activation status if changed
+      if (data.isActivated !== undefined) {
+        localStorage.setItem("account_activated", data.isActivated.toString())
+      }
+
       return
     }
 
@@ -263,7 +331,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       })
 
       // Update local state
-      setUserProfile((prev) => (prev ? { ...prev, ...data } : null))
+      const updatedProfile = userProfile ? { ...userProfile, ...data } : null
+      setUserProfile(updatedProfile)
+
+      // Update localStorage if fullName or email changed
+      if (updatedProfile && (data.fullName || data.email)) {
+        localStorage.setItem(
+          "user_data",
+          JSON.stringify({
+            name: updatedProfile.fullName,
+            email: updatedProfile.email,
+          }),
+        )
+      }
+
+      // Update activation status if changed
+      if (data.isActivated !== undefined) {
+        localStorage.setItem("account_activated", data.isActivated.toString())
+      }
     } catch (error) {
       console.error("Error updating user profile:", error)
       throw error

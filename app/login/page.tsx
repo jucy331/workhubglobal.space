@@ -16,7 +16,7 @@ import { AlertCircle, Info } from "lucide-react"
 export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { login, user, initError, isPreview } = useAuth()
+  const { login, user, userProfile, initError, isPreview } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
@@ -25,24 +25,14 @@ export default function LoginPage() {
   const [error, setError] = useState("")
 
   // Get redirect URL from query params
-  const redirectUrl = searchParams.get("redirect") || "/dashboard"
+  const redirectUrl = searchParams.get("redirect") || "/jobs"
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user) {
-      // Store user data in localStorage for the account dropdown
-      if (user.displayName) {
-        localStorage.setItem(
-          "user_data",
-          JSON.stringify({
-            name: user.displayName,
-            email: user.email || formData.email,
-          }),
-        )
-      }
+    if (user && userProfile) {
       router.push(redirectUrl)
     }
-  }, [user, router, redirectUrl, formData.email])
+  }, [user, userProfile, router, redirectUrl])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -71,18 +61,6 @@ export default function LoginPage() {
     try {
       console.log("Attempting login with:", { email: formData.email })
       await login(formData.email, formData.password)
-
-      // If in preview mode, store mock user data for the dropdown
-      if (isPreview) {
-        localStorage.setItem(
-          "user_data",
-          JSON.stringify({
-            name: "Demo User",
-            email: formData.email,
-          }),
-        )
-      }
-
       router.push(redirectUrl)
     } catch (error: any) {
       console.error("Error logging in:", error)

@@ -5,7 +5,7 @@ import { UserAccountDropdown } from "./user-account-dropdown"
 import { useAuth } from "@/contexts/auth-context"
 
 export function Header() {
-  const { user, isLoading } = useAuth()
+  const { user, userProfile, loading } = useAuth()
 
   return (
     <header className="border-b bg-white">
@@ -27,7 +27,7 @@ export function Header() {
         </nav>
 
         <div className="flex items-center space-x-4">
-          {!isLoading && user ? (
+          {!loading && user && userProfile ? (
             <UserAccountDropdown />
           ) : (
             <Link href="/login">
