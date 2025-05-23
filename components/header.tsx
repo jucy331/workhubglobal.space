@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useState, useEffect } from "react"
 import { UserAccountDropdown } from "./user-account-dropdown"
 
-export function Header() {
+export default function Header() {
   const [user, setUser] = useState<{ name: string; email: string; isActivated: boolean } | null>(null)
   const [loading, setLoading] = useState(true)
 
