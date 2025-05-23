@@ -4,7 +4,7 @@ import Link from "next/link"
 import { UserAccountDropdown } from "./user-account-dropdown"
 import { useAuth } from "@/contexts/auth-context"
 
-export function Header() {
+export default function Header() {
   const { user, userProfile, loading } = useAuth()
 
   return (
