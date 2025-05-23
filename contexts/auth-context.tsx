@@ -116,59 +116,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 // Store activation status
                 localStorage.setItem("account_activated", profile.isActivated.toString())
               } else {
-                console.log("No user profile found in Firestore, creating basic profile from auth user")
-                // Create a basic profile from the auth user if Firestore profile doesn't exist
-                const basicProfile: UserProfile = {
-                  uid: user.uid,
-                  email: user.email || "",
-                  fullName: user.displayName || "User",
-                  isActivated: false,
-                  activationPending: false,
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                  applications: [],
-                }
-                setUserProfile(basicProfile)
-
-                // Store basic user data
-                localStorage.setItem(
-                  "user_data",
-                  JSON.stringify({
-                    name: basicProfile.fullName,
-                    email: basicProfile.email,
-                  }),
-                )
-                localStorage.setItem("account_activated", "false")
+                console.log("No user profile found in Firestore")
               }
             } else {
-              console.error("Firestore not initialized, using auth user data only")
-              // Fallback to auth user data if Firestore is not available
-              const basicProfile: UserProfile = {
-                uid: user.uid,
-                email: user.email || "",
-                fullName: user.displayName || "User",
-                isActivated: false,
-                activationPending: false,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                applications: [],
-              }
-              setUserProfile(basicProfile)
+              console.error("Firestore not initialized, cannot fetch user profile")
             }
           } catch (error) {
             console.error("Error fetching user profile:", error)
-            // Still set a basic profile so the UI can function
-            const basicProfile: UserProfile = {
-              uid: user.uid,
-              email: user.email || "",
-              fullName: user.displayName || "User",
-              isActivated: false,
-              activationPending: false,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              applications: [],
-            }
-            setUserProfile(basicProfile)
           }
         } else {
           setUserProfile(null)

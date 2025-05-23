@@ -1,464 +1,499 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { AlertCircle, Loader2, Upload } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
-import { getJobById } from "@/app/actions/job-actions"
-import { useAuth } from "@/contexts/auth-context"
-import { applyForJob } from "@/lib/job-applications"
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
-import { storage } from "@/lib/firebase"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import ProtectedRoute from "@/components/protected-route"
+import { useParams, useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
-export default function ApplyPage() {
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+
+// Job data from the main page
+type Job = {
+  title: string
+  description: string
+  fullDescription: string
+  payRange: string
+  requirements: string
+  estimatedTime: string
+  category: string
+  id?: string
+}
+
+const jobData: Record<string, Job> = {
+  "survey-tester-001": {
+    title: "Product Tester",
+    description:
+      "Share your opinions on new products and services through our detailed survey platform. Your feedback helps companies improve their offerings and marketing strategies.",
+    fullDescription: `
+      <h2>Job Overview</h2>
+      <p>As a Product Survey Tester, you'll evaluate products, services, and concepts by completing detailed surveys. Your honest feedback helps shape the future of consumer products and services.</p>
+      <h2>Responsibilities</h2>
+      <ul>
+        <li>Complete online surveys about products, services, and consumer experiences</li>
+        <li>Provide thoughtful, detailed responses to questions</li>
+        <li>Test new products and provide feedback on your experience</li>
+        <li>Participate in market research studies</li>
+        <li>Meet deadlines for survey completion</li>
+      </ul>
+      <h2>Requirements</h2>
+      <ul>
+        <li>Reliable internet connection</li>
+        <li>Basic computer skills</li>
+        <li>Ability to express thoughts clearly</li>
+        <li>Attention to detail</li>
+        <li>Honesty and integrity in providing feedback</li>
+      </ul>
+      <h2>Payment Details</h2>
+      <p>Payment varies by survey length and complexity:</p>
+      <ul>
+        <li>Short surveys (5-10 minutes): $2-$5</li>
+        <li>Medium surveys (11-20 minutes): $6-$15</li>
+        <li>Long surveys (21-30 minutes): $16-$25</li>
+        <li>Premium surveys (specialized knowledge): $26-$45</li>
+      </ul>
+      <p>Payments are processed within 7 days of survey completion.</p>
+      <h2>How to Apply</h2>
+      <p>Complete the application form below. Once approved, you'll receive survey opportunities based on your demographic profile and interests.</p>
+    `,
+    payRange: "$2-$45 per survey",
+    requirements: "Internet access, basic computer skills",
+    estimatedTime: "5-30 minutes per survey",
+    category: "Surveys & Market Research",
+  },
+  "transcription-specialist-001": {
+    title: "Audio Transcription Specialist",
+    description: "Convert audio recordings into accurate text documents for our business clients.",
+    fullDescription: `
+      <h2>Job Overview</h2>
+      <p>As an Audio Transcription Specialist, you'll convert spoken content from audio recordings into written text. This role requires excellent listening skills and attention to detail.</p>
+      <h2>Responsibilities</h2>
+      <ul>
+        <li>Transcribe audio recordings accurately and efficiently</li>
+        <li>Follow specific formatting guidelines for different clients</li>
+        <li>Meet deadlines for project completion</li>
+        <li>Maintain confidentiality of sensitive information</li>
+        <li>Perform quality checks on your work before submission</li>
+      </ul>
+      <h2>Requirements</h2>
+      <ul>
+        <li>Excellent listening skills</li>
+        <li>Fast typing speed (minimum 50 WPM)</li>
+        <li>Strong grammar and punctuation skills</li>
+        <li>Ability to understand various accents</li>
+        <li>Reliable internet connection</li>
+        <li>Quiet work environment</li>
+      </ul>
+      <h2>Payment Details</h2>
+      <p>Payment is based on audio hour (the length of the recording):</p>
+      <ul>
+        <li>Standard transcription: $15-$20 per audio hour</li>
+        <li>Technical content: $20-$25 per audio hour</li>
+        <li>Rush jobs may include a 20% premium</li>
+      </ul>
+      <p>Payments are processed weekly for all completed and approved transcriptions.</p>
+      <h2>How to Apply</h2>
+      <p>Complete the application form below and submit a short transcription sample. Successful applicants will be invited to complete a paid test assignment.</p>
+    `,
+    payRange: "$15-$25 per audio hour",
+    requirements: "Good listening skills, typing speed (min. 50 WPM), attention to detail",
+    estimatedTime: "Varies by project",
+    category: "Transcription & Translation",
+  },
+  "survey-004": {
+    title: "Brand Awareness Surveyor",
+    description: "Help brands measure their reach by answering simple surveys.",
+    fullDescription: `
+      <h2>Job Overview</h2>
+      <p>As a Brand Awareness Surveyor, you'll participate in surveys to help brands understand their market reach and customer perception.</p>
+      <h2>Responsibilities</h2>
+      <ul>
+        <li>Complete online surveys about brand recognition and preferences</li>
+        <li>Provide honest and thoughtful feedback</li>
+        <li>Meet deadlines for survey completion</li>
+      </ul>
+      <h2>Requirements</h2>
+      <ul>
+        <li>Internet access</li>
+      </ul>
+      <h2>Payment Details</h2>
+      <p>Earn $2-$8 per survey, depending on length and complexity.</p>
+      <h2>How to Apply</h2>
+      <p>Sign up and start participating in surveys immediately.</p>
+    `,
+    payRange: "$2-$8 per survey",
+    requirements: "Internet access",
+    estimatedTime: "5-15 minutes per survey",
+    category: "Surveys & Market Research",
+  },
+  "survey-005": {
+    title: "Market Research Panelist",
+    description: "Join our market research panel and influence new products.",
+    fullDescription: `
+      <h2>Job Overview</h2>
+      <p>As a Market Research Panelist, you'll provide feedback on products and services to help companies improve their offerings.</p>
+      <h2>Responsibilities</h2>
+      <ul>
+        <li>Participate in online surveys and focus groups</li>
+        <li>Share your opinions on new products and concepts</li>
+        <li>Complete surveys in a timely manner</li>
+      </ul>
+      <h2>Requirements</h2>
+      <ul>
+        <li>Internet access</li>
+        <li>Basic English</li>
+      </ul>
+      <h2>Payment Details</h2>
+      <p>Earn $4-$12 per survey. Payments processed after survey completion.</p>
+      <h2>How to Apply</h2>
+      <p>Register and join our panel to start receiving survey invitations.</p>
+    `,
+    payRange: "$4-$12 per survey",
+    requirements: "Internet access, basic English",
+    estimatedTime: "10-30 minutes per survey",
+    category: "Surveys & Market Research",
+  },
+  "virtual-assistant-011": {
+    title: "Virtual Assistant",
+    description: "Assist businesses remotely with scheduling, email, and admin tasks.",
+    fullDescription: `
+      <h2>Job Overview</h2>
+      <p>As a Virtual Assistant, you'll support clients with administrative tasks, scheduling, and communication.</p>
+      <h2>Responsibilities</h2>
+      <ul>
+        <li>Manage emails and calendars</li>
+        <li>Schedule appointments and meetings</li>
+        <li>Prepare documents and reports</li>
+        <li>Perform data entry and research</li>
+      </ul>
+      <h2>Requirements</h2>
+      <ul>
+        <li>Strong organizational skills</li>
+        <li>Good written communication</li>
+        <li>Reliable internet connection</li>
+      </ul>
+      <h2>Payment Details</h2>
+      <p>$8-$15 per hour, paid weekly.</p>
+      <h2>How to Apply</h2>
+      <p>Submit your resume and a brief cover letter.</p>
+    `,
+    payRange: "$8-$15 per hour",
+    requirements: "Organizational skills, communication, internet",
+    estimatedTime: "10-40 hours/week",
+    category: "Virtual Assistance",
+  },
+  "data-entry-011": {
+    title: "Remote Data Entry Clerk",
+    description: "Enter and update data for our clients from home.",
+    fullDescription: `
+      <h2>Job Overview</h2>
+      <p>As a Data Entry Clerk, you'll input and update information in databases and spreadsheets.</p>
+      <h2>Responsibilities</h2>
+      <ul>
+        <li>Enter data accurately and efficiently</li>
+        <li>Verify and correct data as needed</li>
+        <li>Maintain confidentiality of information</li>
+      </ul>
+      <h2>Requirements</h2>
+      <ul>
+        <li>Attention to detail</li>
+        <li>Basic computer skills</li>
+        <li>Reliable internet connection</li>
+      </ul>
+      <h2>Payment Details</h2>
+      <p>$10-$14 per hour, paid biweekly.</p>
+      <h2>How to Apply</h2>
+      <p>Complete the application form and submit a typing test.</p>
+    `,
+    payRange: "$10-$14 per hour",
+    requirements: "Attention to detail, computer skills",
+    estimatedTime: "Flexible",
+    category: "Data Entry",
+  },
+  "ai-data-labeler-001": {
+    title: "AI Training Data Specialist",
+    description: "Help improve our AI systems by labeling data, reviewing content, and providing feedback.",
+    fullDescription: `
+      <h2>Job Overview</h2>
+      <p>As an AI Training Data Specialist, you'll help train and improve artificial intelligence systems by labeling data and providing human feedback.</p>
+      <h2>Responsibilities</h2>
+      <ul>
+        <li>Label images, text, or audio for AI training</li>
+        <li>Review AI-generated content for accuracy</li>
+        <li>Provide feedback on AI responses</li>
+        <li>Follow detailed guidelines for data labeling</li>
+      </ul>
+      <h2>Requirements</h2>
+      <ul>
+        <li>Attention to detail</li>
+        <li>Basic computer skills</li>
+        <li>Reliable internet connection</li>
+        <li>Ability to follow detailed instructions</li>
+      </ul>
+      <h2>Payment Details</h2>
+      <p>Payment structure:</p>
+      <ul>
+        <li>Basic labeling tasks: $10-$12 per hour</li>
+        <li>Complex labeling: $12-$15 per hour</li>
+        <li>Specialized AI feedback: $15-$18 per hour</li>
+      </ul>
+      <p>Payments are processed weekly for all completed work.</p>
+      <h2>How to Apply</h2>
+      <p>Complete the application form below. Successful applicants will receive a short training and qualification test.</p>
+    `,
+    payRange: "$10-$18 per hour",
+    requirements: "Attention to detail, basic computer skills",
+    estimatedTime: "5-20 hours per week",
+    category: "AI & Machine Learning",
+  },
+}
+
+export default function JobDetailPage() {
   const params = useParams()
   const router = useRouter()
-  const { user, userProfile } = useAuth()
-  const [job, setJob] = useState<any | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [redirecting, setRedirecting] = useState(false)
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    coverLetter: "",
-  })
-  const [resumeFile, setResumeFile] = useState<File | null>(null)
-  const [resumeFileName, setResumeFileName] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
-  const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [job, setJob] = useState<Job | null>(null)
+  const [isActivated, setIsActivated] = useState(false)
+  const [activationDialogOpen, setActivationDialogOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const jobId = params.id as string
 
   useEffect(() => {
-    if (userProfile) {
-      setFormData((prev) => ({
-        ...prev,
-        fullName: userProfile.fullName || "",
-        email: userProfile.email || "",
-      }))
+    // Check if account is activated
+    const activationStatus = localStorage.getItem("account_activated")
+    if (activationStatus === "true") {
+      setIsActivated(true)
     }
-  }, [userProfile])
 
-  useEffect(() => {
-    const fetchJob = async () => {
-      setIsLoading(true)
-      try {
-        const result = await getJobById(params.jobId as string)
-        if (result.success && result.job) {
-          setJob(result.job)
-        } else {
-          // Fallback: always show a sample job for testing
-          setJob({
-            id: params.jobId,
-            title: "Sample Job",
-            company: "Sample Company",
-            location: "Remote",
-            type: ["Full Time"],
-            category: "General",
-            description: "This is a sample job description.",
-            requirements: ["Requirement 1", "Requirement 2"],
-            salary: "$1000 - $2000",
-            postedAt: new Date().toISOString(),
-            logo: "/placeholder.svg"
-          })
-          // setError(result.error || "Job not found")
-        }
-      } catch (err) {
-        setError("Failed to load job details")
-      } finally {
-        setIsLoading(false)
-      }
+    // Get job data
+    if (jobData[jobId]) {
+      setJob(jobData[jobId])
+    } else {
+      // Job not found
+      router.push("/jobs")
     }
-    fetchJob()
-  }, [params.jobId, router])
 
-  useEffect(() => {
-    if (job?.url) {
-      setRedirecting(true)
-      window.location.href = job.url
-    }
-  }, [job?.url])
+    setLoading(false)
+  }, [jobId, router])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
+  const handlePaymentRedirect = () => {
+    // Store the job ID in sessionStorage so we can retrieve it when the user returns
+    sessionStorage.setItem("pending_job_id", jobId)
+
+    // Redirect to PayPal payment page
+    console.log("Redirecting to PayPal payment page...")
+    window.location.href = "https://www.paypal.com/ncp/payment/HX5S7CVY9BQQ2"
   }
 
-  const handleResumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      setResumeFile(file)
-      setResumeFileName(file.name)
-    }
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!user || !userProfile || !job) return
-    setIsSubmitting(true)
-    setSubmitError(null)
-    try {
-      let resumeUrl = ""
-      if (resumeFile) {
-        const storageRef = ref(storage, `resumes/${user.uid}/${Date.now()}-${resumeFile.name}`)
-        await uploadBytes(storageRef, resumeFile)
-        resumeUrl = await getDownloadURL(storageRef)
-      }
-      const result = await applyForJob({
-        userId: user.uid,
-        jobId: job.id,
-        jobTitle: job.title,
-        company: job.company,
-        coverLetter: formData.coverLetter,
-        resumeUrl,
-      })
-      if (result.success) {
-        setSubmitSuccess(true)
-        setTimeout(() => {
-          router.push("/dashboard?tab=applications")
-        }, 3000)
-      } else {
-        setSubmitError(result.error || "Failed to submit application")
-      }
-    } catch (error) {
-      setSubmitError("An unexpected error occurred. Please try again.")
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-12 flex justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
-
-  if (redirecting) {
-    return (
-      <div className="container mx-auto px-4 py-12 flex justify-center">
-        <div>Redirecting to external job listing...</div>
-      </div>
-    )
-  }
-
-  // Not logged in
-  if (!user) {
-    return (
-      <div className="container mx-auto px-4 py-12 text-center">
-        <h2 className="text-2xl font-semibold mb-4">Sign In Required</h2>
-        <p className="mb-4">You must be signed in to apply for jobs.</p>
-        <Link href={`/login?redirect=${encodeURIComponent(`/apply/${params.jobId}`)}`}>
-          <Button>Sign In</Button>
-        </Link>
-      </div>
-    )
-  }
-
-  // Not activated
-  if (!userProfile?.isActivated) {
+  if (loading) {
     return (
       <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mt-6">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-6 w-6 text-red-500 shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-semibold text-red-800 mb-2">Account Activation Required</h3>
-                <p className="text-gray-700 mb-4">
-                  🚫 To apply for jobs, please activate your account for a one-time fee of $5. Once your payment
-                  is verified, you'll gain full access to the application system.
-                </p>
-                <div className="mb-4">
-                  <h4 className="font-semibold mb-2">Benefits of Account Activation:</h4>
-                  <ul className="list-disc pl-5 text-sm text-gray-700 mb-2">
-                    <li>Access to all job details and application forms</li>
-                    <li>Apply to unlimited job opportunities</li>
-                    <li>Receive job alerts for new opportunities</li>
-                    <li>Track your applications and earnings</li>
-                  </ul>
-                  <div className="text-center font-medium">One-time payment: $5.00</div>
+        <div className="max-w-4xl mx-auto text-center">
+          <p>Loading job details...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!job) {
+    return null // Will redirect in useEffect
+  }
+
+  // If not activated, show activation dialog
+  if (!isActivated) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto">
+          <Link href="/jobs" className="inline-flex items-center text-sm mb-6 hover:underline">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to all jobs
+          </Link>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">{job.title}</CardTitle>
+              <CardDescription>{job.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="font-medium text-sm mb-1">Pay Range</h3>
+                    <p>{job.payRange}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-sm mb-1">Time Commitment</h3>
+                    <p>{job.estimatedTime}</p>
+                  </div>
                 </div>
-                <form
-                  action="https://www.paypal.com/ncp/payment/8M4GB5JBDTP9U"
-                  method="post"
-                  target="_blank"
-                  style={{
-                    display: "inline-grid",
-                    justifyItems: "center",
-                    alignContent: "start",
-                    gap: "0.5rem",
-                    marginTop: "1rem"
+
+                <div className="bg-muted p-6 rounded-lg border text-center">
+                  <h2 className="text-xl font-semibold mb-2">Account Activation Required</h2>
+                  <p className="mb-4">
+                    To view complete job details and apply for this position, please activate your account.
+                  </p>
+                  <Button onClick={() => setActivationDialogOpen(true)}>Activate Account ($5.00)</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Account Activation Dialog */}
+          <Dialog open={activationDialogOpen} onOpenChange={setActivationDialogOpen}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Account Activation Required</DialogTitle>
+                <DialogDescription>
+                  To view job details and apply for positions, a one-time account activation fee of $5.00 is required.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col space-y-4 py-4">
+                <div className="rounded-md bg-muted p-4">
+                  <h3 className="font-medium mb-2">Benefits of Account Activation:</h3>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>Access to all job details and application forms</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>Apply to unlimited job opportunities</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>Receive job alerts for new opportunities</span>
+                    </li>
+                    <li className="flex items-start">
+                      <span className="mr-2">•</span>
+                      <span>Track your applications and earnings</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="text-center font-medium">One-time payment: $5.00</div>
+              </div>
+              <DialogFooter className="flex-col sm:flex-row sm:justify-between">
+                <Button variant="outline" onClick={() => setActivationDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    console.log("Activate button clicked")
+                    handlePaymentRedirect()
                   }}
                 >
-                  <input
-                    className="pp-8M4GB5JBDTP9U"
-                    type="submit"
-                    value="Activate Account ($5.00)"
-                    style={{
-                      textAlign: "center",
-                      border: "none",
-                      borderRadius: "0.25rem",
-                      minWidth: "11.625rem",
-                      padding: "0 2rem",
-                      height: "2.625rem",
-                      fontWeight: "bold",
-                      backgroundColor: "#FFD140",
-                      color: "#000000",
-                      fontFamily: '"Helvetica Neue",Arial,sans-serif',
-                      fontSize: "1rem",
-                      lineHeight: "1.25rem",
-                      cursor: "pointer",
-                    }}
-                  />
-                  <img src="https://www.paypalobjects.com/images/Debit_Credit.svg" alt="cards" />
-                  <section style={{ fontSize: "0.75rem" }}>
-                    Powered by{" "}
-                    <img
-                      src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg"
-                      alt="paypal"
-                      style={{ height: "0.875rem", verticalAlign: "middle" }}
+                  Activate Account
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
+    )
+  }
+
+  // If activated, show full job details
+  return (
+    <div className="container mx-auto px-4 py-12">
+      <div className="max-w-4xl mx-auto">
+        <Link href="/jobs" className="inline-flex items-center text-sm mb-6 hover:underline">
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to all jobs
+        </Link>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">{job.title}</CardTitle>
+            <CardDescription>{job.description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-medium text-sm mb-1">Pay Range</h3>
+                  <p>{job.payRange}</p>
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm mb-1">Time Commitment</h3>
+                  <p>{job.estimatedTime}</p>
+                </div>
+              </div>
+
+              <div dangerouslySetInnerHTML={{ __html: job.fullDescription }} className="prose max-w-none" />
+
+              <div className="mt-6">
+                <h2 className="text-xl font-semibold mb-4">Apply for this Position</h2>
+                <form className="space-y-4">
+                  <div className="grid gap-2">
+                    <label htmlFor="name" className="text-sm font-medium">
+                      Full Name
+                    </label>
+                    <input
+                      id="name"
+                      type="text"
+                      className="w-full p-2 border rounded-md"
+                      placeholder="Enter your full name"
                     />
-                  </section>
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor="email" className="text-sm font-medium">
+                      Email Address
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      className="w-full p-2 border rounded-md"
+                      placeholder="Enter your email address"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor="phone" className="text-sm font-medium">
+                      Phone Number
+                    </label>
+                    <input
+                      id="phone"
+                      type="tel"
+                      className="w-full p-2 border rounded-md"
+                      placeholder="Enter your phone number"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label htmlFor="experience" className="text-sm font-medium">
+                      Relevant Experience
+                    </label>
+                    <textarea
+                      id="experience"
+                      className="w-full p-2 border rounded-md min-h-[100px]"
+                      placeholder="Describe any relevant experience you have"
+                    />
+                  </div>
+                  {jobId === "transcription-specialist-001" && (
+                    <div className="grid gap-2">
+                      <label htmlFor="transcription-sample" className="text-sm font-medium">
+                        Transcription Sample
+                      </label>
+                      <textarea
+                        id="transcription-sample"
+                        className="w-full p-2 border rounded-md min-h-[100px]"
+                        placeholder="Submit a short transcription sample"
+                      />
+                    </div>
+                  )}
+                  <Button type="submit" className="w-full bg-black hover:bg-gray-800 text-white">
+                    Submit Application
+                  </Button>
                 </form>
               </div>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
-    )
-  }
-
-  // Activated user: show application form
-  return (
-    <ProtectedRoute>
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <Link href="/jobs" className="text-primary hover:underline mb-4 inline-block">
-              &larr; Back to Jobs
-            </Link>
-            <div className="flex items-start gap-6">
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md border">
-                <Image src={job.logo || "/placeholder.svg"} alt={`${job.company} logo`} fill className="object-cover" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold mb-2">{job.title}</h1>
-                <div className="flex items-center gap-2 text-gray-600 mb-4">
-                  <span>{job.company}</span>
-                  <span>•</span>
-                  <span>{job.location}</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {job.type.map((type: string) => (
-                    <Badge key={type} variant="secondary" className="capitalize">
-                      {type}
-                    </Badge>
-                  ))}
-                  <Badge variant="outline" className="capitalize">
-                    {job.category}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="md:col-span-2 space-y-6">
-              <div>
-                <h2 className="text-xl font-semibold mb-3">Job Description</h2>
-                <p className="text-gray-700">{job.description}</p>
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold mb-3">Requirements</h2>
-                <ul className="list-disc pl-5 space-y-1 text-gray-700">
-                  {job.requirements.map((req: string, index: number) => (
-                    <li key={index}>{req}</li>
-                  ))}
-                </ul>
-              </div>
-              {submitSuccess ? (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-6 mt-6">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="h-6 w-6 text-green-500 shrink-0 mt-0.5" />
-                    <div>
-                      <h3 className="font-semibold text-green-800 mb-2">Application Submitted!</h3>
-                      <p className="text-gray-700 mb-4">
-                        Your application has been successfully submitted. You can track its status in your dashboard.
-                      </p>
-                      <Button asChild>
-                        <Link href="/dashboard?tab=applications">View My Applications</Link>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4 border rounded-lg p-6">
-                  <h2 className="text-xl font-semibold">Apply for this position</h2>
-                  {submitError && (
-                    <Alert variant="destructive" className="mb-4">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertTitle>Error</AlertTitle>
-                      <AlertDescription>{submitError}</AlertDescription>
-                    </Alert>
-                  )}
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-2">
-                      <label htmlFor="fullName" className="text-sm font-medium leading-none">
-                        Full Name
-                      </label>
-                      <input
-                        id="fullName"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleChange}
-                        placeholder="Your full name"
-                        className="flex h-10 w-full rounded-md border border-gray-200 bg-transparent px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="email" className="text-sm font-medium leading-none">
-                        Email
-                      </label>
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        placeholder="Your email address"
-                        className="flex h-10 w-full rounded-md border border-gray-200 bg-transparent px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="phone" className="text-sm font-medium leading-none">
-                        Phone Number
-                      </label>
-                      <input
-                        id="phone"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        placeholder="Your phone number"
-                        className="flex h-10 w-full rounded-md border border-gray-200 bg-transparent px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="coverLetter" className="text-sm font-medium leading-none">
-                        Cover Letter
-                      </label>
-                      <textarea
-                        id="coverLetter"
-                        name="coverLetter"
-                        value={formData.coverLetter}
-                        onChange={handleChange}
-                        placeholder="Write a brief cover letter..."
-                        className="flex min-h-[150px] w-full rounded-md border border-gray-200 bg-transparent px-3 py-2 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-1"
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="resume" className="text-sm font-medium leading-none">
-                        Resume/CV
-                      </label>
-                      <div
-                        className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
-                        onClick={() => document.getElementById("resume")?.click()}
-                      >
-                        {resumeFileName ? (
-                          <div className="flex items-center justify-center gap-2">
-                            <div className="bg-primary/10 p-2 rounded-full">
-                              <Upload className="h-5 w-5 text-primary" />
-                            </div>
-                            <span className="text-sm font-medium">{resumeFileName}</span>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setResumeFile(null)
-                                setResumeFileName("")
-                              }}
-                            >
-                              Change
-                            </Button>
-                          </div>
-                        ) : (
-                          <>
-                            <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                            <p className="text-sm text-gray-500">Drag and drop your resume here, or click to browse</p>
-                            <p className="text-xs text-gray-400 mt-1">Supported formats: PDF, DOCX, RTF (Max 5MB)</p>
-                          </>
-                        )}
-                        <input
-                          id="resume"
-                          type="file"
-                          className="hidden"
-                          accept=".pdf,.docx,.doc,.rtf"
-                          onChange={handleResumeChange}
-                        />
-                      </div>
-                    </div>
-                    <Button type="submit" className="w-full" disabled={isSubmitting}>
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Submitting...
-                        </>
-                      ) : (
-                        "Submit Application"
-                      )}
-                    </Button>
-                  </form>
-                </div>
-              )}
-            </div>
-            <div className="space-y-6">
-              <div className="bg-gray-50 rounded-lg p-6 border">
-                <h3 className="font-semibold mb-4">Job Details</h3>
-                <div className="space-y-3 text-sm">
-                  <div>
-                    <span className="text-gray-500 block">Salary</span>
-                    <span className="font-medium">{job.salary}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500 block">Job Type</span>
-                    <span className="font-medium capitalize">{job.type.join(", ")}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500 block">Category</span>
-                    <span className="font-medium capitalize">{job.category}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500 block">Posted On</span>
-                    <span className="font-medium">{new Date(job.postedAt).toLocaleDateString()}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-6 border">
-                <h3 className="font-semibold mb-4">About {job.company}</h3>
-                <p className="text-sm text-gray-700">
-                  {job.company} is a leading company in the {job.category} industry, providing exceptional services to
-                  clients worldwide. With a focus on quality and innovation, we're always looking for talented
-                  individuals to join our team.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </ProtectedRoute>
+    </div>
   )
 }
