@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/contexts/auth-context"
 
 export function UserAccountDropdown() {
-  const { userProfile, logout } = useAuth()
+  const { userProfile, logout, user } = useAuth()
 
   // Get initials from user's full name
   const getInitials = (name: string) => {
@@ -28,7 +28,10 @@ export function UserAccountDropdown() {
       .substring(0, 2)
   }
 
-  const initials = getInitials(userProfile?.fullName || "Account")
+  // Use userProfile.fullName, user.displayName, or fallback
+  const displayName = userProfile?.fullName || user?.displayName || "Account"
+  const displayEmail = userProfile?.email || user?.email || ""
+  const initials = getInitials(displayName)
 
   const handleLogout = async () => {
     try {
@@ -38,7 +41,8 @@ export function UserAccountDropdown() {
     }
   }
 
-  if (!userProfile) {
+  // Don't render if no user data
+  if (!userProfile && !user) {
     return null
   }
 
@@ -54,7 +58,7 @@ export function UserAccountDropdown() {
               {initials}
             </AvatarFallback>
           </Avatar>
-          {userProfile.isActivated && (
+          {userProfile?.isActivated && (
             <div className="absolute -top-1 -right-1 h-4 w-4 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
               <CheckCircle className="h-2.5 w-2.5 text-white" />
             </div>
@@ -70,10 +74,10 @@ export function UserAccountDropdown() {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">{userProfile.fullName}</p>
-              <p className="text-xs text-gray-600 truncate">{userProfile.email}</p>
+              <p className="text-sm font-semibold text-gray-900 truncate">{displayName}</p>
+              <p className="text-xs text-gray-600 truncate">{displayEmail}</p>
               <div className="flex items-center space-x-2 mt-1">
-                {userProfile.isActivated ? (
+                {userProfile?.isActivated ? (
                   <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">
                     <Crown className="h-3 w-3 mr-1" />
                     Activated
@@ -106,7 +110,7 @@ export function UserAccountDropdown() {
             <span>My Applications</span>
           </Link>
         </DropdownMenuItem>
-        {!userProfile.isActivated && (
+        {!userProfile?.isActivated && (
           <DropdownMenuItem asChild>
             <Link href="/activate" className="flex w-full cursor-pointer items-center text-blue-600">
               <CheckCircle className="mr-3 h-4 w-4" />
