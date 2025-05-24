@@ -29,10 +29,18 @@ export default function LoginPage() {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (user && userProfile) {
+    if (!authLoading && user && userProfile) {
       router.push(redirectUrl)
     }
-  }, [user, userProfile, router, redirectUrl])
+  }, [user, userProfile, router, redirectUrl]),
+  
+  if (authLoading) {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <span>Loading...</span>
+    </div>
+  );
+}
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
