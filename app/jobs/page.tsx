@@ -16,7 +16,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
+import { Skeleton } from "@/components/ui/skeleton"
 
 type Job = {
   title: string
@@ -341,32 +342,36 @@ const jobData: Record<string, Job> = {
   },
 }
 
-// Organize jobs by category
-const jobsByCategory: Record<string, Job[]> = {}
-Object.entries(jobData).forEach(([id, job]) => {
-  if (!jobsByCategory[job.category]) {
-    jobsByCategory[job.category] = []
-  }
-  jobsByCategory[job.category].push({ ...job, id })
-})
-
-// Get all unique categories
-const categories = Object.keys(jobsByCategory)
-
 export default function JobsPage() {
   const { userProfile, loading } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
-  const [isClient, setIsClient] = useState(false)
   const [isActivated, setIsActivated] = useState(false)
   const [activationDialogOpen, setActivationDialogOpen] = useState(false)
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
   const [activeCategory, setActiveCategory] = useState("all")
+  const [isInitialized, setIsInitialized] = useState(false)
+
+  // Memoize expensive computations
+  const { jobsByCategory, categories, featuredJobs } = useMemo(() => {
+    const jobsByCategory: Record<string, Job[]> = {}
+    Object.entries(jobData).forEach(([id, job]) => {
+      if (!jobsByCategory[job.category]) {
+        jobsByCategory[job.category] = []
+      }
+      jobsByCategory[job.category].push({ ...job, id })
+    })
+
+    const categories = Object.keys(jobsByCategory)
+    const featuredJobs = Object.entries(jobData)
+      .filter(([_, job]) => job.featured)
+      .map(([id, job]) => ({ ...job, id }))
+
+    return { jobsByCategory, categories, featuredJobs }
+  }, [])
 
   useEffect(() => {
-    setIsClient(true)
-
-    // Check if account is activated
+    // Initialize client-side state
     const activationStatus = localStorage.getItem("account_activated")
     if (activationStatus === "true") {
       setIsActivated(true)
@@ -377,11 +382,9 @@ export default function JobsPage() {
     const paymentStatus = urlParams.get("payment_status")
 
     if (paymentStatus === "success") {
-      // Activate account
       localStorage.setItem("account_activated", "true")
       setIsActivated(true)
 
-      // If there was a pending job, redirect to it
       const pendingJobId = sessionStorage.getItem("pending_job_id")
       if (pendingJobId) {
         sessionStorage.removeItem("pending_job_id")
@@ -393,41 +396,30 @@ export default function JobsPage() {
         description: "Your account has been successfully activated. You now have access to all job details.",
       })
     }
+
+    setIsInitialized(true)
   }, [toast, router])
 
   const handleViewDetails = (jobId: string) => {
     if (isActivated) {
-      // If account is activated, go directly to job details
       router.push(`/job/${jobId}`)
     } else {
-      // If not activated, show activation dialog
       setSelectedJobId(jobId)
       setActivationDialogOpen(true)
     }
   }
 
   const handlePaymentRedirect = () => {
-    // Store the job ID in sessionStorage so we can retrieve it when the user returns
     if (selectedJobId) {
       sessionStorage.setItem("pending_job_id", selectedJobId)
     }
-
-    // Redirect to PayPal payment page
     console.log("Redirecting to PayPal payment page...")
     window.location.href = "https://www.paypal.com/ncp/payment/HX5S7CVY9BQQ2"
   }
 
-  // Get featured jobs
-  const featuredJobs = Object.entries(jobData)
-    .filter(([_, job]) => job.featured)
-    .map(([id, job]) => ({ ...job, id }))
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="text-center">Loading jobs...</div>
-      </div>
-    )
+  // Show loading skeleton while auth is loading or not initialized
+  if (loading || !isInitialized) {
+    return <JobsPageSkeleton />
   }
 
   if (!userProfile) {
@@ -850,6 +842,60 @@ export default function JobsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  )
+}
+
+// Loading skeleton component
+function JobsPageSkeleton() {
+  return (
+    <div className="min-h-screen">
+      {/* Hero Section Skeleton */}
+      <section className="relative py-20 px-4 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 text-white">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center">
+            <Skeleton className="h-16 w-3/4 mx-auto mb-6 bg-white/20" />
+            <Skeleton className="h-8 w-2/3 mx-auto mb-8 bg-white/20" />
+            <div className="flex gap-4 justify-center mb-12">
+              <Skeleton className="h-12 w-32 bg-white/20" />
+              <Skeleton className="h-12 w-32 bg-white/20" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="text-center">
+                  <Skeleton className="h-8 w-20 mx-auto mb-2 bg-white/20" />
+                  <Skeleton className="h-4 w-24 mx-auto bg-white/20" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Jobs Skeleton */}
+      <section className="py-16 px-4 bg-white">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-12">
+            <Skeleton className="h-8 w-64 mx-auto mb-4" />
+            <Skeleton className="h-4 w-96 mx-auto" />
+          </div>
+          <div className="grid gap-6 md:grid-cols-2">
+            {[1, 2].map((i) => (
+              <div key={i} className="border rounded-lg p-6">
+                <Skeleton className="h-6 w-3/4 mb-4" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-2/3 mb-4" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-1/2" />
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
+                <Skeleton className="h-10 w-full mt-4" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
