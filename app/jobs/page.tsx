@@ -47,298 +47,512 @@ type Job = {
 }
 
 const jobData: Record<string, Job> = {
-  "survey-tester-001": {
-    title: "Product Survey Tester",
+  "survey-product-feedback-001": {
+    title: "Product Feedback Survey Specialist",
     description:
-      "Share your opinions on new products and services through our detailed survey platform. Your feedback helps companies improve their offerings and marketing strategies.",
+      "Test new products and provide detailed feedback through surveys. Help shape the future of consumer products by sharing your honest opinions on everything from apps to household items.",
     fullDescription: `
       <h2>Job Overview</h2>
-      <p>As a Product Survey Tester, you'll evaluate products, services, and concepts by completing detailed surveys. Your honest feedback helps shape the future of consumer products and services.</p>
+      <p>As a Product Feedback Survey Specialist, you'll be among the first to test new products, services, and digital platforms. Your detailed feedback helps companies improve their offerings before public launch.</p>
       <h2>Responsibilities</h2>
       <ul>
-        <li>Complete online surveys about products, services, and consumer experiences</li>
-        <li>Provide thoughtful, detailed responses to questions</li>
-        <li>Test new products and provide feedback on your experience</li>
-        <li>Participate in market research studies</li>
-        <li>Meet deadlines for survey completion</li>
+        <li>Test new products, apps, and services before public release</li>
+        <li>Complete detailed feedback surveys about your experience</li>
+        <li>Provide honest opinions on usability, design, and functionality</li>
+        <li>Participate in follow-up surveys and focus groups</li>
+        <li>Meet survey deadlines and quality requirements</li>
       </ul>
       <h2>Requirements</h2>
       <ul>
-        <li>Reliable internet connection</li>
-        <li>Basic computer skills</li>
-        <li>Ability to express thoughts clearly</li>
-        <li>Attention to detail</li>
-        <li>Honesty and integrity in providing feedback</li>
+        <li>Reliable internet connection and smartphone</li>
+        <li>Attention to detail and honest feedback</li>
+        <li>Ability to articulate thoughts clearly</li>
+        <li>18+ years old with valid email address</li>
+        <li>Willingness to try new products and services</li>
       </ul>
       <h2>Payment Details</h2>
-      <p>Payment varies by survey length and complexity:</p>
+      <p>Competitive pay based on survey complexity:</p>
       <ul>
-        <li>Short surveys (5-10 minutes): $2-$5</li>
-        <li>Medium surveys (11-20 minutes): $6-$15</li>
-        <li>Long surveys (21-30 minutes): $16-$25</li>
-        <li>Premium surveys (specialized knowledge): $26-$45</li>
+        <li>Quick surveys (5-10 minutes): $3-$8</li>
+        <li>Product testing surveys (15-25 minutes): $10-$25</li>
+        <li>In-depth feedback sessions (30-45 minutes): $25-$50</li>
+        <li>Premium brand testing: $50-$100</li>
       </ul>
-      <p>Payments are processed within 7 days of survey completion.</p>
+      <p>Payments processed within 48 hours via PayPal or direct deposit.</p>
       <h2>How to Apply</h2>
-      <p>Complete the application form below. Once approved, you'll receive survey opportunities based on your demographic profile and interests.</p>
+      <p>Complete the application form below. Approved testers receive immediate access to available surveys.</p>
     `,
-    payRange: "$2-$45 per survey",
-    requirements: "Internet access, basic computer skills",
-    estimatedTime: "5-30 minutes per survey",
+    payRange: "$3-$100 per survey",
+    requirements: "Internet access, smartphone, honest feedback",
+    estimatedTime: "5-45 minutes per survey",
     category: "Surveys & Market Research",
     difficulty: "Beginner",
-    popularity: 95,
+    popularity: 98,
     featured: true,
   },
-  "transcription-specialist-001": {
-    title: "Audio Transcription Specialist",
-    description: "Convert audio recordings into accurate text documents for our business clients.",
+  "ai-chatbot-trainer-001": {
+    title: "AI Chatbot Conversation Trainer",
+    description:
+      "Help train AI chatbots by having conversations and rating responses. Improve AI communication through human feedback and conversation examples.",
     fullDescription: `
       <h2>Job Overview</h2>
-      <p>As an Audio Transcription Specialist, you'll convert spoken content from audio recordings into written text. This role requires excellent listening skills and attention to detail.</p>
+      <p>As an AI Chatbot Conversation Trainer, you'll engage in conversations with AI systems and provide feedback to improve their responses. This role is crucial for developing more natural and helpful AI assistants.</p>
       <h2>Responsibilities</h2>
       <ul>
-        <li>Transcribe audio recordings accurately and efficiently</li>
-        <li>Follow specific formatting guidelines for different clients</li>
-        <li>Meet deadlines for project completion</li>
-        <li>Maintain confidentiality of sensitive information</li>
-        <li>Perform quality checks on your work before submission</li>
+        <li>Engage in conversations with AI chatbots on various topics</li>
+        <li>Rate the quality and helpfulness of AI responses</li>
+        <li>Provide examples of better responses when needed</li>
+        <li>Test AI systems for bias, accuracy, and appropriateness</li>
+        <li>Complete training modules on AI evaluation criteria</li>
       </ul>
       <h2>Requirements</h2>
       <ul>
-        <li>Excellent listening skills</li>
-        <li>Fast typing speed (minimum 50 WPM)</li>
-        <li>Strong grammar and punctuation skills</li>
-        <li>Ability to understand various accents</li>
+        <li>Strong communication skills in English</li>
+        <li>Basic understanding of AI and chatbots</li>
+        <li>Critical thinking and evaluation skills</li>
         <li>Reliable internet connection</li>
-        <li>Quiet work environment</li>
+        <li>Patience for repetitive tasks</li>
       </ul>
       <h2>Payment Details</h2>
-      <p>Payment is based on audio hour (the length of the recording):</p>
+      <p>Hourly compensation based on experience:</p>
       <ul>
-        <li>Standard transcription: $15-$20 per audio hour</li>
-        <li>Technical content: $20-$25 per audio hour</li>
-        <li>Rush jobs may include a 20% premium</li>
+        <li>Entry level: $14-$16 per hour</li>
+        <li>Experienced trainers: $16-$20 per hour</li>
+        <li>Specialized domains (medical, legal): $20-$25 per hour</li>
+        <li>Quality bonuses available for top performers</li>
       </ul>
-      <p>Payments are processed weekly for all completed and approved transcriptions.</p>
+      <p>Weekly payments via PayPal or bank transfer.</p>
       <h2>How to Apply</h2>
-      <p>Complete the application form below and submit a short transcription sample. Successful applicants will be invited to complete a paid test assignment.</p>
+      <p>Submit your application with a brief writing sample. Successful candidates complete a paid training session.</p>
     `,
-    payRange: "$15-$25 per audio hour",
-    requirements: "Good listening skills, typing speed (min. 50 WPM), attention to detail",
-    estimatedTime: "Varies by project",
-    category: "Transcription & Translation",
+    payRange: "$14-$25 per hour",
+    requirements: "Communication skills, critical thinking, internet",
+    estimatedTime: "10-30 hours per week",
+    category: "AI & Machine Learning",
+    difficulty: "Intermediate",
+    popularity: 94,
+    featured: true,
+  },
+  "survey-consumer-habits-001": {
+    title: "Consumer Behavior Survey Participant",
+    description:
+      "Share your shopping habits and lifestyle preferences through quick surveys. Help brands understand consumer trends and preferences.",
+    fullDescription: `
+      <h2>Job Overview</h2>
+      <p>Participate in surveys about your shopping habits, lifestyle choices, and consumer preferences. Your insights help brands develop better products and marketing strategies.</p>
+      <h2>Responsibilities</h2>
+      <ul>
+        <li>Complete surveys about shopping and lifestyle habits</li>
+        <li>Provide honest feedback about brands and products</li>
+        <li>Participate in market research studies</li>
+        <li>Share opinions on advertising and marketing campaigns</li>
+        <li>Maintain consistent participation for ongoing studies</li>
+      </ul>
+      <h2>Requirements</h2>
+      <ul>
+        <li>18+ years old with regular shopping habits</li>
+        <li>Honest and detailed responses</li>
+        <li>Reliable internet access</li>
+        <li>Basic computer or smartphone skills</li>
+        <li>Willingness to share consumer preferences</li>
+      </ul>
+      <h2>Payment Details</h2>
+      <p>Payment varies by survey type:</p>
+      <ul>
+        <li>Quick preference surveys: $2-$5</li>
+        <li>Shopping habit surveys: $5-$12</li>
+        <li>Brand perception studies: $10-$20</li>
+        <li>Lifestyle research surveys: $15-$30</li>
+      </ul>
+      <p>Instant payments upon survey completion.</p>
+      <h2>How to Apply</h2>
+      <p>Complete your demographic profile to receive matched survey opportunities.</p>
+    `,
+    payRange: "$2-$30 per survey",
+    requirements: "Age 18+, shopping habits, internet access",
+    estimatedTime: "3-20 minutes per survey",
+    category: "Surveys & Market Research",
+    difficulty: "Beginner",
+    popularity: 96,
+  },
+  "ai-image-labeling-001": {
+    title: "AI Image Recognition Trainer",
+    description:
+      "Help train AI systems to recognize objects, people, and scenes in images. Label and categorize images to improve computer vision technology.",
+    fullDescription: `
+      <h2>Job Overview</h2>
+      <p>Train AI systems to better understand visual content by labeling images, identifying objects, and categorizing visual elements. Your work directly improves computer vision technology.</p>
+      <h2>Responsibilities</h2>
+      <ul>
+        <li>Label objects, people, and scenes in digital images</li>
+        <li>Categorize images based on content and context</li>
+        <li>Identify and tag specific elements within images</li>
+        <li>Verify accuracy of AI-generated image labels</li>
+        <li>Follow detailed labeling guidelines and standards</li>
+      </ul>
+      <h2>Requirements</h2>
+      <ul>
+        <li>Good visual perception and attention to detail</li>
+        <li>Basic computer skills and internet access</li>
+        <li>Ability to follow detailed instructions</li>
+        <li>Patience for repetitive visual tasks</li>
+        <li>Understanding of basic image categories</li>
+      </ul>
+      <h2>Payment Details</h2>
+      <p>Competitive rates based on task complexity:</p>
+      <ul>
+        <li>Simple object labeling: $12-$14 per hour</li>
+        <li>Complex scene analysis: $14-$17 per hour</li>
+        <li>Specialized content (medical, technical): $17-$22 per hour</li>
+        <li>Quality bonuses for high accuracy rates</li>
+      </ul>
+      <p>Weekly payments with performance tracking dashboard.</p>
+      <h2>How to Apply</h2>
+      <p>Complete the application and pass a brief image labeling test to get started.</p>
+    `,
+    payRange: "$12-$22 per hour",
+    requirements: "Visual perception, attention to detail, computer skills",
+    estimatedTime: "5-25 hours per week",
+    category: "AI & Machine Learning",
+    difficulty: "Beginner",
+    popularity: 91,
+  },
+  "simple-data-entry-001": {
+    title: "Online Data Entry Specialist",
+    description:
+      "Enter information from various sources into digital databases. Simple, straightforward work that can be done from anywhere with flexible hours.",
+    fullDescription: `
+      <h2>Job Overview</h2>
+      <p>Perform accurate data entry tasks from the comfort of your home. Work involves transferring information from various sources into digital formats with high accuracy requirements.</p>
+      <h2>Responsibilities</h2>
+      <ul>
+        <li>Enter data from documents into online systems</li>
+        <li>Verify accuracy of entered information</li>
+        <li>Maintain data quality and consistency standards</li>
+        <li>Process various document types (forms, receipts, surveys)</li>
+        <li>Meet daily productivity targets</li>
+      </ul>
+      <h2>Requirements</h2>
+      <ul>
+        <li>Typing speed of at least 40 WPM</li>
+        <li>High attention to detail and accuracy</li>
+        <li>Basic computer and internet skills</li>
+        <li>Quiet work environment</li>
+        <li>Reliable internet connection</li>
+      </ul>
+      <h2>Payment Details</h2>
+      <p>Competitive hourly rates with bonuses:</p>
+      <ul>
+        <li>Standard data entry: $11-$14 per hour</li>
+        <li>Specialized data entry: $14-$17 per hour</li>
+        <li>Accuracy bonuses up to $2/hour extra</li>
+        <li>Speed bonuses for exceeding targets</li>
+      </ul>
+      <p>Bi-weekly payments via direct deposit or PayPal.</p>
+      <h2>How to Apply</h2>
+      <p>Complete the application and take a brief typing and accuracy test.</p>
+    `,
+    payRange: "$11-$17 per hour",
+    requirements: "40+ WPM typing, accuracy, computer skills",
+    estimatedTime: "10-40 hours per week",
+    category: "Data Entry",
+    difficulty: "Beginner",
+    popularity: 93,
+  },
+  "survey-app-testing-001": {
+    title: "Mobile App Testing Survey Specialist",
+    description:
+      "Test new mobile apps and provide feedback through detailed surveys. Help developers improve app functionality and user experience.",
+    fullDescription: `
+      <h2>Job Overview</h2>
+      <p>Test mobile applications before they launch to the public and provide valuable feedback through surveys. Your input helps developers create better, more user-friendly apps.</p>
+      <h2>Responsibilities</h2>
+      <ul>
+        <li>Download and test new mobile applications</li>
+        <li>Complete detailed surveys about app functionality</li>
+        <li>Report bugs, glitches, and usability issues</li>
+        <li>Provide feedback on app design and user experience</li>
+        <li>Test apps across different scenarios and use cases</li>
+      </ul>
+      <h2>Requirements</h2>
+      <ul>
+        <li>Smartphone (iOS or Android) with internet access</li>
+        <li>Willingness to download and test various apps</li>
+        <li>Good communication skills for detailed feedback</li>
+        <li>Patience for testing and retesting features</li>
+        <li>Basic understanding of mobile app functionality</li>
+      </ul>
+      <h2>Payment Details</h2>
+      <p>Payment based on testing complexity:</p>
+      <ul>
+        <li>Quick app tests (10-15 minutes): $5-$10</li>
+        <li>Detailed app reviews (20-30 minutes): $12-$20</li>
+        <li>Comprehensive testing sessions (45-60 minutes): $25-$40</li>
+        <li>Beta testing programs: $40-$75</li>
+      </ul>
+      <p>Same-day payments for completed surveys.</p>
+      <h2>How to Apply</h2>
+      <p>Register with your device information to receive compatible app testing opportunities.</p>
+    `,
+    payRange: "$5-$75 per test",
+    requirements: "Smartphone, internet, testing patience",
+    estimatedTime: "10-60 minutes per test",
+    category: "Surveys & Market Research",
+    difficulty: "Beginner",
+    popularity: 89,
+    featured: true,
+  },
+  "virtual-assistant-simple-001": {
+    title: "Simple Virtual Assistant Tasks",
+    description:
+      "Handle basic administrative tasks for small businesses. Includes email management, appointment scheduling, and simple research tasks.",
+    fullDescription: `
+      <h2>Job Overview</h2>
+      <p>Provide virtual administrative support to small businesses and entrepreneurs. Handle routine tasks that help business owners focus on growing their companies.</p>
+      <h2>Responsibilities</h2>
+      <ul>
+        <li>Manage email correspondence and responses</li>
+        <li>Schedule appointments and manage calendars</li>
+        <li>Conduct basic online research</li>
+        <li>Create simple documents and spreadsheets</li>
+        <li>Handle customer inquiries and basic support</li>
+      </ul>
+      <h2>Requirements</h2>
+      <ul>
+        <li>Strong written communication skills</li>
+        <li>Basic computer skills (email, documents, internet)</li>
+        <li>Reliable internet connection</li>
+        <li>Professional attitude and discretion</li>
+        <li>Ability to work independently</li>
+      </ul>
+      <h2>Payment Details</h2>
+      <p>Flexible hourly rates based on tasks:</p>
+      <ul>
+        <li>Basic admin tasks: $10-$13 per hour</li>
+        <li>Email management: $12-$15 per hour</li>
+        <li>Research and data tasks: $13-$16 per hour</li>
+        <li>Customer service tasks: $14-$17 per hour</li>
+      </ul>
+      <p>Weekly payments with detailed time tracking.</p>
+      <h2>How to Apply</h2>
+      <p>Submit your application with a brief cover letter highlighting your administrative experience.</p>
+    `,
+    payRange: "$10-$17 per hour",
+    requirements: "Communication skills, computer basics, reliability",
+    estimatedTime: "5-30 hours per week",
+    category: "Virtual Assistance",
+    difficulty: "Beginner",
+    popularity: 87,
+  },
+  "ai-text-evaluation-001": {
+    title: "AI Writing Quality Evaluator",
+    description:
+      "Review and rate AI-generated text content for quality, accuracy, and helpfulness. Help improve AI writing capabilities through human feedback.",
+    fullDescription: `
+      <h2>Job Overview</h2>
+      <p>Evaluate AI-generated written content across various topics and formats. Your feedback helps train AI systems to produce better, more accurate, and more helpful written content.</p>
+      <h2>Responsibilities</h2>
+      <ul>
+        <li>Read and evaluate AI-generated articles, emails, and responses</li>
+        <li>Rate content for accuracy, clarity, and helpfulness</li>
+        <li>Identify factual errors and inconsistencies</li>
+        <li>Provide feedback on writing style and tone</li>
+        <li>Compare multiple AI responses and rank quality</li>
+      </ul>
+      <h2>Requirements</h2>
+      <ul>
+        <li>Excellent reading comprehension and writing skills</li>
+        <li>Strong attention to detail</li>
+        <li>Basic knowledge across various topics</li>
+        <li>Critical thinking and evaluation abilities</li>
+        <li>Reliable internet connection</li>
+      </ul>
+      <h2>Payment Details</h2>
+      <p>Competitive rates for quality evaluation:</p>
+      <ul>
+        <li>Basic text evaluation: $13-$16 per hour</li>
+        <li>Technical content review: $16-$20 per hour</li>
+        <li>Specialized subject evaluation: $18-$24 per hour</li>
+        <li>Quality bonuses for consistent accuracy</li>
+      </ul>
+      <p>Weekly payments with performance metrics tracking.</p>
+      <h2>How to Apply</h2>
+      <p>Complete the application and pass a text evaluation assessment to begin.</p>
+    `,
+    payRange: "$13-$24 per hour",
+    requirements: "Writing skills, critical thinking, attention to detail",
+    estimatedTime: "8-25 hours per week",
+    category: "AI & Machine Learning",
     difficulty: "Intermediate",
     popularity: 88,
   },
-  "ai-data-labeler-001": {
-    title: "AI Training Data Specialist",
-    description: "Help improve our AI systems by labeling data, reviewing content, and providing feedback.",
+  "survey-website-feedback-001": {
+    title: "Website User Experience Survey Tester",
+    description:
+      "Visit websites and provide feedback through surveys about usability, design, and user experience. Help improve website functionality.",
     fullDescription: `
       <h2>Job Overview</h2>
-      <p>As an AI Training Data Specialist, you'll help train and improve artificial intelligence systems by labeling data and providing human feedback.</p>
+      <p>Test websites and online platforms by completing specific tasks and providing detailed feedback through surveys. Your insights help improve website design and user experience.</p>
       <h2>Responsibilities</h2>
       <ul>
-        <li>Label images, text, or audio for AI training</li>
-        <li>Review AI-generated content for accuracy</li>
-        <li>Provide feedback on AI responses</li>
-        <li>Follow detailed guidelines for data labeling</li>
+        <li>Navigate websites and complete assigned tasks</li>
+        <li>Provide feedback on website usability and design</li>
+        <li>Complete surveys about your user experience</li>
+        <li>Test website functionality across different devices</li>
+        <li>Report any technical issues or broken features</li>
       </ul>
       <h2>Requirements</h2>
       <ul>
-        <li>Attention to detail</li>
-        <li>Basic computer skills</li>
-        <li>Reliable internet connection</li>
+        <li>Basic internet browsing skills</li>
+        <li>Access to computer and/or mobile device</li>
         <li>Ability to follow detailed instructions</li>
-      </ul>
-      <h2>Payment Details</h2>
-      <p>Payment structure:</p>
-      <ul>
-        <li>Basic labeling tasks: $10-$12 per hour</li>
-        <li>Complex labeling: $12-$15 per hour</li>
-        <li>Specialized AI feedback: $15-$18 per hour</li>
-      </ul>
-      <p>Payments are processed weekly for all completed work.</p>
-      <h2>How to Apply</h2>
-      <p>Complete the application form below. Successful applicants will receive a short training and qualification test.</p>
-    `,
-    payRange: "$10-$18 per hour",
-    requirements: "Attention to detail, basic computer skills",
-    estimatedTime: "5-20 hours per week",
-    category: "AI & Machine Learning",
-    difficulty: "Intermediate",
-    popularity: 92,
-    featured: true,
-  },
-  "virtual-assistant-011": {
-    title: "Virtual Assistant",
-    description: "Assist businesses remotely with scheduling, email, and admin tasks.",
-    fullDescription: `
-      <h2>Job Overview</h2>
-      <p>As a Virtual Assistant, you'll support clients with administrative tasks, scheduling, and communication.</p>
-      <h2>Responsibilities</h2>
-      <ul>
-        <li>Manage emails and calendars</li>
-        <li>Schedule appointments and meetings</li>
-        <li>Prepare documents and reports</li>
-        <li>Perform data entry and research</li>
-      </ul>
-      <h2>Requirements</h2>
-      <ul>
-        <li>Strong organizational skills</li>
-        <li>Good written communication</li>
+        <li>Good observation and communication skills</li>
         <li>Reliable internet connection</li>
       </ul>
       <h2>Payment Details</h2>
-      <p>$8-$15 per hour, paid weekly.</p>
+      <p>Payment based on testing session length:</p>
+      <ul>
+        <li>Quick website tests (5-10 minutes): $4-$8</li>
+        <li>Standard usability tests (15-25 minutes): $10-$18</li>
+        <li>Comprehensive site reviews (30-45 minutes): $20-$35</li>
+        <li>Multi-device testing sessions: $35-$50</li>
+      </ul>
+      <p>Immediate payment upon survey completion.</p>
       <h2>How to Apply</h2>
-      <p>Submit your resume and a brief cover letter.</p>
+      <p>Register and complete a sample website test to qualify for paid opportunities.</p>
     `,
-    payRange: "$8-$15 per hour",
-    requirements: "Organizational skills, communication, internet",
-    estimatedTime: "10-40 hours/week",
-    category: "Virtual Assistance",
+    payRange: "$4-$50 per test",
+    requirements: "Internet browsing, device access, observation skills",
+    estimatedTime: "5-45 minutes per test",
+    category: "Surveys & Market Research",
+    difficulty: "Beginner",
+    popularity: 92,
+  },
+  "simple-transcription-001": {
+    title: "Simple Audio Transcription Tasks",
+    description:
+      "Transcribe clear, short audio recordings into text. Perfect for beginners with basic typing skills looking for flexible work.",
+    fullDescription: `
+      <h2>Job Overview</h2>
+      <p>Transcribe short, clear audio recordings into accurate text documents. Work with high-quality audio files that are easy to understand and transcribe.</p>
+      <h2>Responsibilities</h2>
+      <ul>
+        <li>Listen to audio recordings and type what you hear</li>
+        <li>Ensure accurate spelling and punctuation</li>
+        <li>Follow basic formatting guidelines</li>
+        <li>Complete transcriptions within specified deadlines</li>
+        <li>Review work for accuracy before submission</li>
+      </ul>
+      <h2>Requirements</h2>
+      <ul>
+        <li>Good listening skills and attention to detail</li>
+        <li>Basic typing skills (minimum 35 WPM)</li>
+        <li>Quiet work environment</li>
+        <li>Reliable internet connection</li>
+        <li>Basic English grammar and spelling skills</li>
+      </ul>
+      <h2>Payment Details</h2>
+      <p>Fair rates for transcription work:</p>
+      <ul>
+        <li>Simple transcription: $12-$15 per audio hour</li>
+        <li>Clear speech recordings: $15-$18 per audio hour</li>
+        <li>Rush jobs: 25% bonus rate</li>
+        <li>Quality bonuses for high accuracy</li>
+      </ul>
+      <p>Weekly payments for all completed work.</p>
+      <h2>How to Apply</h2>
+      <p>Complete the application and submit a short transcription sample to demonstrate your skills.</p>
+    `,
+    payRange: "$12-$18 per audio hour",
+    requirements: "Listening skills, 35+ WPM typing, quiet environment",
+    estimatedTime: "Flexible hours",
+    category: "Transcription & Translation",
     difficulty: "Beginner",
     popularity: 85,
   },
-  "content-moderator-001": {
-    title: "Content Moderation Specialist",
-    description: "Review and moderate user-generated content for our client platforms.",
+  "content-moderation-simple-001": {
+    title: "Basic Content Review Specialist",
+    description:
+      "Review user-generated content for basic policy violations. Simple moderation tasks with clear guidelines and training provided.",
     fullDescription: `
       <h2>Job Overview</h2>
-      <p>As a Content Moderation Specialist, you'll review user-generated content to ensure it meets community guidelines and standards.</p>
+      <p>Review user-generated content such as comments, posts, and images to ensure they meet basic community guidelines. Work with clear policies and comprehensive training.</p>
       <h2>Responsibilities</h2>
       <ul>
-        <li>Review text, images, and videos for policy violations</li>
-        <li>Make quick decisions on content acceptability</li>
-        <li>Flag inappropriate or harmful content</li>
-        <li>Apply platform-specific guidelines consistently</li>
+        <li>Review text posts and comments for policy violations</li>
+        <li>Check images for inappropriate content</li>
+        <li>Apply community guidelines consistently</li>
+        <li>Flag content that requires further review</li>
+        <li>Maintain productivity and accuracy standards</li>
       </ul>
       <h2>Requirements</h2>
       <ul>
         <li>Good judgment and decision-making skills</li>
-        <li>Attention to detail</li>
         <li>Ability to handle potentially sensitive content</li>
+        <li>Strong attention to detail</li>
         <li>Reliable internet connection</li>
+        <li>Professional attitude and discretion</li>
       </ul>
       <h2>Payment Details</h2>
-      <p>$12-$18 per hour, depending on shift and content type.</p>
-      <p>Payments processed bi-weekly.</p>
+      <p>Competitive hourly rates with training:</p>
+      <ul>
+        <li>Training period: $12 per hour (paid)</li>
+        <li>Standard moderation: $13-$16 per hour</li>
+        <li>Specialized content: $16-$19 per hour</li>
+        <li>Performance bonuses available</li>
+      </ul>
+      <p>Bi-weekly payments with detailed performance tracking.</p>
       <h2>How to Apply</h2>
-      <p>Complete the application form below. Successful candidates will receive training on content policies.</p>
+      <p>Submit your application and complete a content review assessment to get started.</p>
     `,
-    payRange: "$12-$18 per hour",
-    requirements: "Good judgment, attention to detail, resilience",
-    estimatedTime: "15-30 hours per week",
+    payRange: "$12-$19 per hour",
+    requirements: "Good judgment, attention to detail, discretion",
+    estimatedTime: "15-35 hours per week",
     category: "Social Media & Moderation",
-    difficulty: "Intermediate",
-    popularity: 78,
+    difficulty: "Beginner",
+    popularity: 82,
   },
-  "data-entry-011": {
-    title: "Remote Data Entry Clerk",
-    description: "Enter and update data for our clients from home.",
+  "survey-food-delivery-001": {
+    title: "Food & Restaurant Survey Participant",
+    description:
+      "Share your dining and food delivery experiences through surveys. Help restaurants and delivery services improve their offerings.",
     fullDescription: `
       <h2>Job Overview</h2>
-      <p>As a Data Entry Clerk, you'll input and update information in databases and spreadsheets.</p>
+      <p>Participate in surveys about your food ordering, dining, and delivery experiences. Your feedback helps restaurants and food delivery services enhance their customer experience.</p>
       <h2>Responsibilities</h2>
       <ul>
-        <li>Enter data accurately and efficiently</li>
-        <li>Verify and correct data as needed</li>
-        <li>Maintain confidentiality of information</li>
+        <li>Complete surveys about restaurant and food delivery experiences</li>
+        <li>Provide feedback on food quality, service, and delivery</li>
+        <li>Share opinions on menu items and pricing</li>
+        <li>Participate in taste testing surveys (when applicable)</li>
+        <li>Review restaurant apps and ordering platforms</li>
       </ul>
       <h2>Requirements</h2>
       <ul>
-        <li>Attention to detail</li>
-        <li>Basic computer skills</li>
-        <li>Reliable internet connection</li>
+        <li>Regular food ordering or dining out habits</li>
+        <li>Honest and detailed feedback abilities</li>
+        <li>Basic internet and smartphone skills</li>
+        <li>18+ years old</li>
+        <li>Willingness to try new restaurants and foods</li>
       </ul>
       <h2>Payment Details</h2>
-      <p>$10-$14 per hour, paid biweekly.</p>
+      <p>Rewards for food-related surveys:</p>
+      <ul>
+        <li>Quick dining surveys: $3-$7</li>
+        <li>Delivery experience surveys: $5-$12</li>
+        <li>Restaurant review surveys: $8-$15</li>
+        <li>Food taste testing: $15-$30</li>
+      </ul>
+      <p>Instant payments plus occasional food vouchers and discounts.</p>
       <h2>How to Apply</h2>
-      <p>Complete the application form and submit a typing test.</p>
+      <p>Complete your food preferences profile to receive relevant survey opportunities.</p>
     `,
-    payRange: "$10-$14 per hour",
-    requirements: "Attention to detail, computer skills",
-    estimatedTime: "Flexible",
-    category: "Data Entry",
+    payRange: "$3-$30 per survey",
+    requirements: "Dining habits, honest feedback, smartphone",
+    estimatedTime: "5-25 minutes per survey",
+    category: "Surveys & Market Research",
     difficulty: "Beginner",
     popularity: 90,
-  },
-  "customer-service-001": {
-    title: "Online Customer Service Representative",
-    description: "Provide excellent customer support via chat, email, and phone for e-commerce clients.",
-    fullDescription: `
-      <h2>Job Overview</h2>
-      <p>As an Online Customer Service Representative, you'll be the first point of contact for customers, helping them with inquiries, orders, and resolving issues.</p>
-      <h2>Responsibilities</h2>
-      <ul>
-        <li>Respond to customer inquiries via chat, email, and phone</li>
-        <li>Process orders, returns, and refunds</li>
-        <li>Troubleshoot product and service issues</li>
-        <li>Maintain detailed records of customer interactions</li>
-        <li>Escalate complex issues to supervisors when needed</li>
-      </ul>
-      <h2>Requirements</h2>
-      <ul>
-        <li>Excellent communication skills</li>
-        <li>Patience and empathy when dealing with customers</li>
-        <li>Basic computer skills and familiarity with CRM systems</li>
-        <li>Quiet home office environment</li>
-        <li>Reliable internet and phone connection</li>
-      </ul>
-      <h2>Payment Details</h2>
-      <p>$12-$16 per hour based on experience and performance metrics.</p>
-      <p>Bonus opportunities available for high customer satisfaction scores.</p>
-      <h2>How to Apply</h2>
-      <p>Submit your application with a brief cover letter highlighting your customer service experience.</p>
-    `,
-    payRange: "$12-$16 per hour",
-    requirements: "Communication skills, patience, quiet environment",
-    estimatedTime: "20-40 hours/week",
-    category: "Customer Service",
-    difficulty: "Beginner",
-    popularity: 87,
-  },
-  "content-writer-001": {
-    title: "Freelance Content Writer",
-    description: "Create engaging blog posts, articles, and web content for various industries.",
-    fullDescription: `
-      <h2>Job Overview</h2>
-      <p>As a Freelance Content Writer, you'll create high-quality written content for websites, blogs, and marketing materials across diverse industries.</p>
-      <h2>Responsibilities</h2>
-      <ul>
-        <li>Write SEO-optimized blog posts and articles</li>
-        <li>Create product descriptions and marketing copy</li>
-        <li>Research topics thoroughly before writing</li>
-        <li>Edit and proofread content for accuracy</li>
-        <li>Meet deadlines and word count requirements</li>
-      </ul>
-      <h2>Requirements</h2>
-      <ul>
-        <li>Excellent writing and grammar skills</li>
-        <li>Experience with SEO best practices</li>
-        <li>Ability to write in various tones and styles</li>
-        <li>Research skills and attention to detail</li>
-        <li>Portfolio of writing samples</li>
-      </ul>
-      <h2>Payment Details</h2>
-      <p>Payment varies by project complexity:</p>
-      <ul>
-        <li>Blog posts (500-800 words): $25-$50</li>
-        <li>Long-form articles (1000+ words): $50-$100</li>
-        <li>Product descriptions: $5-$15 each</li>
-        <li>Technical writing: $0.10-$0.25 per word</li>
-      </ul>
-      <h2>How to Apply</h2>
-      <p>Submit your application with writing samples and specify your areas of expertise.</p>
-    `,
-    payRange: "$25-$100 per article",
-    requirements: "Writing skills, SEO knowledge, portfolio",
-    estimatedTime: "10-30 hours/week",
-    category: "Content Writing",
-    difficulty: "Intermediate",
-    popularity: 83,
-    featured: true,
   },
 }
 
