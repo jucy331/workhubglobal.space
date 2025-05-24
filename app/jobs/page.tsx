@@ -17,6 +17,7 @@ import {
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -262,7 +263,6 @@ const jobData: Record<string, Job> = {
     difficulty: "Beginner",
     popularity: 90,
   },
-  // NEW JOBS ADDED BELOW
   "customer-service-001": {
     title: "Online Customer Service Representative",
     description: "Provide excellent customer support via chat, email, and phone for e-commerce clients.",
@@ -339,323 +339,6 @@ const jobData: Record<string, Job> = {
     popularity: 83,
     featured: true,
   },
-  "social-media-manager-001": {
-    title: "Social Media Manager",
-    description: "Manage social media accounts for small businesses and create engaging content.",
-    fullDescription: `
-      <h2>Job Overview</h2>
-      <p>As a Social Media Manager, you'll help small businesses grow their online presence by creating and managing content across various social media platforms.</p>
-      <h2>Responsibilities</h2>
-      <ul>
-        <li>Create and schedule social media posts</li>
-        <li>Engage with followers and respond to comments</li>
-        <li>Develop content calendars and strategies</li>
-        <li>Monitor social media analytics and performance</li>
-        <li>Stay updated on social media trends and best practices</li>
-      </ul>
-      <h2>Requirements</h2>
-      <ul>
-        <li>Experience with major social media platforms</li>
-        <li>Basic graphic design skills (Canva, etc.)</li>
-        <li>Understanding of social media analytics</li>
-        <li>Creative thinking and content creation skills</li>
-        <li>Excellent written communication</li>
-      </ul>
-      <h2>Payment Details</h2>
-      <p>$300-$800 per month per client, depending on scope of work.</p>
-      <p>Opportunity to manage multiple clients simultaneously.</p>
-      <h2>How to Apply</h2>
-      <p>Submit examples of social media accounts you've managed or content you've created.</p>
-    `,
-    payRange: "$300-$800 per client/month",
-    requirements: "Social media experience, design skills, creativity",
-    estimatedTime: "15-25 hours/week",
-    category: "Social Media & Marketing",
-    difficulty: "Intermediate",
-    popularity: 79,
-  },
-  "online-tutor-001": {
-    title: "Online English Tutor",
-    description: "Teach English to international students through video calls and interactive lessons.",
-    fullDescription: `
-      <h2>Job Overview</h2>
-      <p>As an Online English Tutor, you'll help students from around the world improve their English language skills through personalized one-on-one or group lessons.</p>
-      <h2>Responsibilities</h2>
-      <ul>
-        <li>Conduct online English lessons via video calls</li>
-        <li>Create lesson plans tailored to student needs</li>
-        <li>Assess student progress and provide feedback</li>
-        <li>Prepare learning materials and exercises</li>
-        <li>Maintain student records and progress reports</li>
-      </ul>
-      <h2>Requirements</h2>
-      <ul>
-        <li>Native or near-native English proficiency</li>
-        <li>Teaching experience or TEFL/TESOL certification preferred</li>
-        <li>Patience and enthusiasm for teaching</li>
-        <li>Reliable internet and video calling setup</li>
-        <li>Flexible schedule to accommodate different time zones</li>
-      </ul>
-      <h2>Payment Details</h2>
-      <p>$10-$20 per hour depending on experience and qualifications.</p>
-      <p>Bonus payments for student retention and positive reviews.</p>
-      <h2>How to Apply</h2>
-      <p>Submit your application with teaching credentials and a brief video introduction.</p>
-    `,
-    payRange: "$10-$20 per hour",
-    requirements: "English proficiency, teaching experience, patience",
-    estimatedTime: "10-30 hours/week",
-    category: "Online Tutoring",
-    difficulty: "Intermediate",
-    popularity: 86,
-  },
-  "graphic-designer-001": {
-    title: "Freelance Graphic Designer",
-    description: "Create visual designs for logos, marketing materials, and digital content.",
-    fullDescription: `
-      <h2>Job Overview</h2>
-      <p>As a Freelance Graphic Designer, you'll create compelling visual designs for various clients including logos, marketing materials, and digital graphics.</p>
-      <h2>Responsibilities</h2>
-      <ul>
-        <li>Design logos, business cards, and branding materials</li>
-        <li>Create social media graphics and web banners</li>
-        <li>Develop marketing materials like flyers and brochures</li>
-        <li>Collaborate with clients to understand design requirements</li>
-        <li>Provide multiple design concepts and revisions</li>
-      </ul>
-      <h2>Requirements</h2>
-      <ul>
-        <li>Proficiency in Adobe Creative Suite (Photoshop, Illustrator, InDesign)</li>
-        <li>Strong portfolio showcasing design skills</li>
-        <li>Understanding of design principles and color theory</li>
-        <li>Ability to work with client feedback and deadlines</li>
-        <li>Creative problem-solving skills</li>
-      </ul>
-      <h2>Payment Details</h2>
-      <p>Project-based pricing:</p>
-      <ul>
-        <li>Logo design: $50-$200</li>
-        <li>Business card design: $25-$75</li>
-        <li>Social media graphics: $15-$50 each</li>
-        <li>Brochure design: $100-$300</li>
-      </ul>
-      <h2>How to Apply</h2>
-      <p>Submit your portfolio and specify your design specialties and software proficiency.</p>
-    `,
-    payRange: "$25-$300 per project",
-    requirements: "Adobe Creative Suite, portfolio, design skills",
-    estimatedTime: "15-35 hours/week",
-    category: "Graphic Design",
-    difficulty: "Advanced",
-    popularity: 81,
-  },
-  "web-developer-001": {
-    title: "Junior Web Developer",
-    description: "Build and maintain websites for small businesses using modern web technologies.",
-    fullDescription: `
-      <h2>Job Overview</h2>
-      <p>As a Junior Web Developer, you'll create and maintain websites for small businesses, focusing on responsive design and user experience.</p>
-      <h2>Responsibilities</h2>
-      <ul>
-        <li>Build responsive websites using HTML, CSS, and JavaScript</li>
-        <li>Customize WordPress themes and plugins</li>
-        <li>Optimize websites for speed and SEO</li>
-        <li>Troubleshoot and fix website issues</li>
-        <li>Collaborate with designers and clients on requirements</li>
-      </ul>
-      <h2>Requirements</h2>
-      <ul>
-        <li>Proficiency in HTML, CSS, and JavaScript</li>
-        <li>Experience with WordPress or other CMS platforms</li>
-        <li>Understanding of responsive design principles</li>
-        <li>Basic knowledge of SEO best practices</li>
-        <li>Portfolio of completed websites</li>
-      </ul>
-      <h2>Payment Details</h2>
-      <p>$20-$40 per hour depending on complexity and experience.</p>
-      <p>Project-based pricing also available for complete website builds.</p>
-      <h2>How to Apply</h2>
-      <p>Submit your portfolio with examples of websites you've built and your technical skills.</p>
-    `,
-    payRange: "$20-$40 per hour",
-    requirements: "HTML/CSS/JS, WordPress, portfolio",
-    estimatedTime: "20-40 hours/week",
-    category: "Web Development",
-    difficulty: "Advanced",
-    popularity: 84,
-  },
-  "video-editor-001": {
-    title: "Video Editor",
-    description: "Edit videos for YouTube creators, businesses, and marketing campaigns.",
-    fullDescription: `
-      <h2>Job Overview</h2>
-      <p>As a Video Editor, you'll transform raw footage into polished videos for various clients including YouTube creators, businesses, and marketing agencies.</p>
-      <h2>Responsibilities</h2>
-      <ul>
-        <li>Edit raw video footage into engaging final products</li>
-        <li>Add music, sound effects, and voiceovers</li>
-        <li>Create motion graphics and text overlays</li>
-        <li>Color correct and enhance video quality</li>
-        <li>Export videos in various formats for different platforms</li>
-      </ul>
-      <h2>Requirements</h2>
-      <ul>
-        <li>Proficiency in video editing software (Adobe Premiere, Final Cut Pro, etc.)</li>
-        <li>Understanding of video formats and compression</li>
-        <li>Creative eye for storytelling and pacing</li>
-        <li>Attention to detail and ability to meet deadlines</li>
-        <li>Portfolio of edited videos</li>
-      </ul>
-      <h2>Payment Details</h2>
-      <p>$15-$50 per hour or $50-$300 per finished video depending on length and complexity.</p>
-      <h2>How to Apply</h2>
-      <p>Submit your reel showcasing your best video editing work and specify your software expertise.</p>
-    `,
-    payRange: "$15-$50 per hour",
-    requirements: "Video editing software, creativity, portfolio",
-    estimatedTime: "10-30 hours/week",
-    category: "Video Production",
-    difficulty: "Intermediate",
-    popularity: 77,
-  },
-  "translator-001": {
-    title: "Document Translator",
-    description: "Translate documents and content between English and other languages.",
-    fullDescription: `
-      <h2>Job Overview</h2>
-      <p>As a Document Translator, you'll provide accurate translations of various documents, websites, and content between English and your native language.</p>
-      <h2>Responsibilities</h2>
-      <ul>
-        <li>Translate documents while maintaining original meaning</li>
-        <li>Proofread and edit translated content</li>
-        <li>Research terminology and cultural context</li>
-        <li>Meet deadlines for translation projects</li>
-        <li>Communicate with clients about project requirements</li>
-      </ul>
-      <h2>Requirements</h2>
-      <ul>
-        <li>Native or near-native proficiency in two or more languages</li>
-        <li>Excellent writing skills in both languages</li>
-        <li>Cultural knowledge and sensitivity</li>
-        <li>Attention to detail and accuracy</li>
-        <li>Translation experience or certification preferred</li>
-      </ul>
-      <h2>Payment Details</h2>
-      <p>$0.08-$0.20 per word depending on language pair and complexity.</p>
-      <p>Rush jobs may include premium rates.</p>
-      <h2>How to Apply</h2>
-      <p>Submit your application specifying your language pairs and any translation experience.</p>
-    `,
-    payRange: "$0.08-$0.20 per word",
-    requirements: "Bilingual proficiency, writing skills, cultural knowledge",
-    estimatedTime: "10-25 hours/week",
-    category: "Transcription & Translation",
-    difficulty: "Intermediate",
-    popularity: 82,
-  },
-  "bookkeeper-001": {
-    title: "Remote Bookkeeper",
-    description: "Manage financial records and bookkeeping for small businesses remotely.",
-    fullDescription: `
-      <h2>Job Overview</h2>
-      <p>As a Remote Bookkeeper, you'll help small businesses maintain accurate financial records and manage their day-to-day bookkeeping needs.</p>
-      <h2>Responsibilities</h2>
-      <ul>
-        <li>Record financial transactions in accounting software</li>
-        <li>Reconcile bank statements and credit card accounts</li>
-        <li>Prepare invoices and track accounts receivable</li>
-        <li>Generate financial reports and statements</li>
-        <li>Assist with tax preparation and compliance</li>
-      </ul>
-      <h2>Requirements</h2>
-      <ul>
-        <li>Experience with accounting software (QuickBooks, Xero, etc.)</li>
-        <li>Understanding of basic accounting principles</li>
-        <li>Attention to detail and accuracy</li>
-        <li>Confidentiality and trustworthiness</li>
-        <li>Bookkeeping certification preferred</li>
-      </ul>
-      <h2>Payment Details</h2>
-      <p>$15-$25 per hour depending on experience and complexity of work.</p>
-      <p>Monthly retainer arrangements available for ongoing clients.</p>
-      <h2>How to Apply</h2>
-      <p>Submit your application with relevant bookkeeping experience and software proficiency.</p>
-    `,
-    payRange: "$15-$25 per hour",
-    requirements: "Accounting software, bookkeeping experience, attention to detail",
-    estimatedTime: "15-30 hours/week",
-    category: "Finance & Accounting",
-    difficulty: "Intermediate",
-    popularity: 75,
-  },
-  "market-research-analyst-001": {
-    title: "Market Research Analyst",
-    description: "Conduct market research and analyze consumer trends for business clients.",
-    fullDescription: `
-      <h2>Job Overview</h2>
-      <p>As a Market Research Analyst, you'll gather and analyze data about markets, competitors, and consumer behavior to help businesses make informed decisions.</p>
-      <h2>Responsibilities</h2>
-      <ul>
-        <li>Design and conduct market research surveys</li>
-        <li>Analyze market trends and consumer behavior</li>
-        <li>Compile research findings into comprehensive reports</li>
-        <li>Monitor competitor activities and pricing</li>
-        <li>Present insights and recommendations to clients</li>
-      </ul>
-      <h2>Requirements</h2>
-      <ul>
-        <li>Strong analytical and research skills</li>
-        <li>Proficiency in data analysis tools (Excel, SPSS, etc.)</li>
-        <li>Excellent written and verbal communication</li>
-        <li>Understanding of statistical methods</li>
-        <li>Bachelor's degree in relevant field preferred</li>
-      </ul>
-      <h2>Payment Details</h2>
-      <p>$18-$30 per hour or $500-$2000 per research project.</p>
-      <h2>How to Apply</h2>
-      <p>Submit your application with examples of research work and analytical skills.</p>
-    `,
-    payRange: "$18-$30 per hour",
-    requirements: "Research skills, data analysis, communication",
-    estimatedTime: "20-35 hours/week",
-    category: "Surveys & Market Research",
-    difficulty: "Advanced",
-    popularity: 73,
-  },
-  "email-marketing-specialist-001": {
-    title: "Email Marketing Specialist",
-    description: "Create and manage email marketing campaigns for e-commerce businesses.",
-    fullDescription: `
-      <h2>Job Overview</h2>
-      <p>As an Email Marketing Specialist, you'll design, implement, and optimize email marketing campaigns to help businesses engage with their customers and drive sales.</p>
-      <h2>Responsibilities</h2>
-      <ul>
-        <li>Create email marketing campaigns and newsletters</li>
-        <li>Design email templates and write compelling copy</li>
-        <li>Segment email lists and target specific audiences</li>
-        <li>Analyze campaign performance and optimize for better results</li>
-        <li>Manage email automation sequences</li>
-      </ul>
-      <h2>Requirements</h2>
-      <ul>
-        <li>Experience with email marketing platforms (Mailchimp, Klaviyo, etc.)</li>
-        <li>Understanding of email marketing best practices</li>
-        <li>Basic HTML/CSS knowledge for email design</li>
-        <li>Analytical skills to interpret campaign metrics</li>
-        <li>Creative writing and design skills</li>
-      </ul>
-      <h2>Payment Details</h2>
-      <p>$400-$1200 per month per client depending on campaign complexity.</p>
-      <h2>How to Apply</h2>
-      <p>Submit examples of email campaigns you've created and your platform experience.</p>
-    `,
-    payRange: "$400-$1200 per client/month",
-    requirements: "Email marketing platforms, HTML/CSS, analytics",
-    estimatedTime: "15-25 hours/week",
-    category: "Digital Marketing",
-    difficulty: "Intermediate",
-    popularity: 80,
-  },
 }
 
 // Organize jobs by category
@@ -671,6 +354,7 @@ Object.entries(jobData).forEach(([id, job]) => {
 const categories = Object.keys(jobsByCategory)
 
 export default function JobsPage() {
+  const { userProfile, loading } = useAuth()
   const { toast } = useToast()
   const router = useRouter()
   const [isClient, setIsClient] = useState(false)
@@ -738,6 +422,40 @@ export default function JobsPage() {
     .filter(([_, job]) => job.featured)
     .map(([id, job]) => ({ ...job, id }))
 
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center">Loading jobs...</div>
+      </div>
+    )
+  }
+
+  if (!userProfile) {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Please Sign In</h1>
+          <p className="text-gray-600 mb-6">You need to be signed in to browse job opportunities.</p>
+          <div className="space-y-4">
+            <Link href="/login">
+              <Button size="lg" className="mr-4">
+                Sign In
+              </Button>
+            </Link>
+            <Link href="/register">
+              <Button size="lg" variant="outline">
+                Create Account
+              </Button>
+            </Link>
+          </div>
+          <div className="mt-8 text-sm text-gray-500">
+            <p>Join thousands of people earning money from home with legitimate online opportunities.</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -754,8 +472,8 @@ export default function JobsPage() {
               </span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto leading-relaxed">
-              Join thousands of people earning money from home with legitimate online opportunities. Flexible hours,
-              competitive pay, no experience required.
+              Welcome back, {userProfile.fullName}! Browse legitimate online opportunities with flexible hours and
+              competitive pay.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
@@ -767,14 +485,15 @@ export default function JobsPage() {
                 Browse Jobs
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-blue-600 font-semibold px-8 py-4 text-lg"
-                asChild
-              >
-                <Link href="/create-account">Start Free Account</Link>
-              </Button>
+              <Link href="/dashboard">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-white hover:bg-white hover:text-blue-600 font-semibold px-8 py-4 text-lg"
+                >
+                  View Dashboard
+                </Button>
+              </Link>
             </div>
 
             {/* Stats */}
@@ -1175,19 +894,19 @@ function JobCard({
 
   return (
     <div
-      className={`group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${featured ? "ring-2 ring-blue-500 shadow-lg" : ""}`}
+      className={`group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-white rounded-lg border p-6 ${featured ? "ring-2 ring-blue-500 shadow-lg" : ""}`}
     >
       <div className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="text-lg group-hover:text-blue-600 transition-colors">
+            <div className="text-lg font-semibold group-hover:text-blue-600 transition-colors">
               {title}
               {featured && (
-                <div className="ml-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white">Featured</div>
+                <Badge className="ml-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white">Featured</Badge>
               )}
             </div>
             <div className="flex items-center space-x-2 mt-2">
-              <div className={`rounded-lg px-2 py-1 ${getDifficultyColor(difficulty)}`}>{difficulty}</div>
+              <Badge className={`text-xs ${getDifficultyColor(difficulty)}`}>{difficulty}</Badge>
               <div className="flex items-center text-sm text-gray-600">
                 <Star className="h-3 w-3 text-yellow-500 mr-1" />
                 {popularity}% match
@@ -1195,9 +914,9 @@ function JobCard({
             </div>
           </div>
         </div>
-        <div className="mt-2 line-clamp-2">{description}</div>
+        <div className="mt-3 text-gray-600 line-clamp-2">{description}</div>
       </div>
-      <div className="pb-3">
+      <div className="pb-4">
         <div className="grid gap-3">
           <div className="flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-green-600 flex-shrink-0" />
