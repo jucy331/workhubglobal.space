@@ -671,13 +671,8 @@ export default function JobsPage() {
 
         <div className="container mx-auto max-w-6xl relative z-10">
           <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              Find Your Perfect
-              <span className="block bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
-                Remote Job
-              </span>
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto leading-relaxed">
+            
+                        <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto leading-relaxed">
               Welcome back, {userProfile.fullName}! Browse legitimate online opportunities with flexible hours and
               competitive pay.
             </p>
