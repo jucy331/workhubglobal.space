@@ -1,29 +1,80 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "@/contexts/auth-context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-// Make sure this component exists in your project
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Briefcase, CheckCircle, DollarSign, FileText, Star, Users } from "lucide-react"
 import Link from "next/link"
+
+// Sample data for demonstration
+const sampleApplications = [
+  {
+    id: 1,
+    jobTitle: "Frontend Developer",
+    company: "Tech Corp",
+    status: "pending",
+    appliedDate: "2024-01-15",
+    earnings: 0,
+  },
+  {
+    id: 2,
+    jobTitle: "UI/UX Designer",
+    company: "Design Studio",
+    status: "accepted",
+    appliedDate: "2024-01-10",
+    earnings: 1500,
+  },
+  {
+    id: 3,
+    jobTitle: "Data Analyst",
+    company: "Analytics Inc",
+    status: "completed",
+    appliedDate: "2024-01-05",
+    earnings: 2000,
+  },
+]
 
 export default function DashboardPage() {
   const { userProfile, loading } = useAuth()
   const [stats, setStats] = useState({
-    applicationsSubmitted: 0,
-    applicationsAccepted: 0,
-    totalEarnings: 0,
-    currentWeekEarnings: 0,
-    completedJobs: 0,
-    averageRating: 0,
-    hoursWorked: 0,
-    activeJobs: 0,
+    applicationsSubmitted: 5,
+    applicationsAccepted: 2,
+    totalEarnings: 6500,
+    currentWeekEarnings: 500,
+    completedJobs: 3,
+    averageRating: 4.8,
+    hoursWorked: 120,
+    activeJobs: 2,
   })
 
-  const recentApplications = []
+  const [activationDialogOpen, setActivationDialogOpen] = useState(false)
+  const [isActivated, setIsActivated] = useState(false)
+
+  useEffect(() => {
+    const activationStatus = localStorage.getItem("account_activated")
+    if (activationStatus === "true") {
+      setIsActivated(true)
+    }
+  }, [])
+
+  // Use sample data for demonstration
+  const recentApplications = sampleApplications
+
+  const handlePaymentRedirect = () => {
+    console.log("Redirecting to PayPal payment page...")
+    window.location.href = "https://www.paypal.com/ncp/payment/HX5S7CVY9BQQ2"
+  }
 
   if (loading) {
     return (
@@ -77,15 +128,18 @@ export default function DashboardPage() {
     }
   }
 
+  const successRate =
+    stats.applicationsSubmitted > 0 ? Math.round((stats.applicationsAccepted / stats.applicationsSubmitted) * 100) : 0
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Welcome back, {userProfile.fullName}!</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Welcome back, {userProfile?.fullName || "User"}!</h1>
         <p className="text-gray-600 mt-2">Here's an overview of your work activity</p>
       </div>
 
       {/* Account Status */}
-      {!userProfile.isActivated && (
+      {!userProfile?.isActivated && (
         <Card className="mb-8 border-orange-200 bg-orange-50">
           <CardHeader>
             <CardTitle className="flex items-center text-orange-800">
@@ -97,9 +151,9 @@ export default function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/jobs">
-              <Button className="bg-orange-600 hover:bg-orange-700">Activate Account ($5.00)</Button>
-            </Link>
+            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => setActivationDialogOpen(true)}>
+              Activate Account ($5.00)
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -160,21 +214,30 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentApplications.map((application) => (
-                <div key={application.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <h4 className="font-medium">{application.jobTitle}</h4>
-                    <p className="text-sm text-gray-600">{application.company}</p>
-                    <p className="text-xs text-gray-500">Applied: {application.appliedDate}</p>
-                  </div>
-                  <div className="flex flex-col items-end space-y-2">
-                    <Badge className={getStatusColor(application.status)}>{getStatusText(application.status)}</Badge>
-                    {application.earnings > 0 && (
-                      <span className="text-sm font-medium text-green-600">${application.earnings.toFixed(2)}</span>
-                    )}
-                  </div>
+              {recentApplications.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-600 mb-4">No applications yet</p>
+                  <Link href="/jobs">
+                    <Button>Browse Jobs</Button>
+                  </Link>
                 </div>
-              ))}
+              ) : (
+                recentApplications.map((application) => (
+                  <div key={application.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex-1">
+                      <h4 className="font-medium">{application.jobTitle}</h4>
+                      <p className="text-sm text-gray-600">{application.company}</p>
+                      <p className="text-xs text-gray-500">Applied: {application.appliedDate}</p>
+                    </div>
+                    <div className="flex flex-col items-end space-y-2">
+                      <Badge className={getStatusColor(application.status)}>{getStatusText(application.status)}</Badge>
+                      {application.earnings > 0 && (
+                        <span className="text-sm font-medium text-green-600">${application.earnings.toFixed(2)}</span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
             <div className="mt-4">
               <Link href="/applications">
@@ -196,9 +259,9 @@ export default function DashboardPage() {
             <div>
               <div className="flex justify-between text-sm mb-2">
                 <span>Application Success Rate</span>
-                <span>0%</span>
+                <span>{successRate}%</span>
               </div>
-              <Progress value={0} />
+              <Progress value={successRate} />
             </div>
 
             <div>
@@ -211,11 +274,11 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-2 gap-4 pt-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">0</div>
+                <div className="text-2xl font-bold text-blue-600">{stats.hoursWorked}</div>
                 <div className="text-xs text-gray-600">Hours Worked</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">0</div>
+                <div className="text-2xl font-bold text-green-600">{stats.averageRating}</div>
                 <div className="text-xs text-gray-600">Avg Rating</div>
               </div>
             </div>
@@ -236,17 +299,11 @@ export default function DashboardPage() {
           <CardDescription>Common tasks and shortcuts</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             <Link href="/jobs">
               <Button variant="outline" className="w-full h-20 flex flex-col">
                 <Briefcase className="h-6 w-6 mb-2" />
                 Browse Jobs
-              </Button>
-            </Link>
-            <Link href="/applications">
-              <Button variant="outline" className="w-full h-20 flex flex-col">
-                <FileText className="h-6 w-6 mb-2" />
-                My Applications
               </Button>
             </Link>
             <Link href="/settings">
@@ -258,6 +315,48 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Account Activation Dialog */}
+      <Dialog open={activationDialogOpen} onOpenChange={setActivationDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Account Activation Required</DialogTitle>
+            <DialogDescription>
+              To view job details and apply for positions, a one-time account activation fee of $5.00 is required.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col space-y-4 py-4">
+            <div className="rounded-md bg-muted p-4">
+              <h3 className="font-medium mb-2">Benefits of Account Activation:</h3>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Access to all job details and application forms</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Apply to unlimited job opportunities</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Receive job alerts for new opportunities</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span>Track your applications and earnings</span>
+                </li>
+              </ul>
+            </div>
+            <div className="text-center font-medium">One-time payment: $5.00</div>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row sm:justify-between">
+            <Button variant="outline" onClick={() => setActivationDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handlePaymentRedirect}>Activate Account</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
