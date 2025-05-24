@@ -32,15 +32,7 @@ export default function LoginPage() {
     if (!authLoading && user && userProfile) {
       router.push(redirectUrl)
     }
-  }, [user, userProfile, router, redirectUrl]),
-  
-  if (authLoading) {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <span>Loading...</span>
-    </div>
-  );
-}
+  }, [user, userProfile, router, redirectUrl])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
