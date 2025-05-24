@@ -18,44 +18,19 @@ import { Briefcase, CheckCircle, DollarSign, FileText, Star, Users } from "lucid
 import Link from "next/link"
 
 // Sample data for demonstration
-const sampleApplications = [
-  {
-    id: 1,
-    jobTitle: "Frontend Developer",
-    company: "Tech Corp",
-    status: "pending",
-    appliedDate: "2024-01-15",
-    earnings: 0,
-  },
-  {
-    id: 2,
-    jobTitle: "UI/UX Designer",
-    company: "Design Studio",
-    status: "accepted",
-    appliedDate: "2024-01-10",
-    earnings: 1500,
-  },
-  {
-    id: 3,
-    jobTitle: "Data Analyst",
-    company: "Analytics Inc",
-    status: "completed",
-    appliedDate: "2024-01-05",
-    earnings: 2000,
-  },
-]
+const sampleApplications = []
 
 export default function DashboardPage() {
   const { userProfile, loading } = useAuth()
   const [stats, setStats] = useState({
-    applicationsSubmitted: 5,
-    applicationsAccepted: 2,
-    totalEarnings: 6500,
-    currentWeekEarnings: 500,
-    completedJobs: 3,
-    averageRating: 4.8,
-    hoursWorked: 120,
-    activeJobs: 2,
+    applicationsSubmitted: 0,
+    applicationsAccepted: 0,
+    totalEarnings: 0.0,
+    currentWeekEarnings: 0.0,
+    completedJobs: 0,
+    averageRating: 0,
+    hoursWorked: 0,
+    activeJobs: 0,
   })
 
   const [activationDialogOpen, setActivationDialogOpen] = useState(false)
