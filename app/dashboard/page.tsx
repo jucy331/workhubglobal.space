@@ -6,52 +6,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+// Make sure this component exists in your project
 import { Briefcase, CheckCircle, DollarSign, FileText, Star, Users } from "lucide-react"
 import Link from "next/link"
-
-// Sample data for demonstration
-const sampleApplications = [
-  {
-    id: 1,
-    jobTitle: "Frontend Developer",
-    company: "Tech Corp",
-    status: "pending",
-    appliedDate: "2024-01-15",
-    earnings: 0,
-  },
-  {
-    id: 2,
-    jobTitle: "UI/UX Designer",
-    company: "Design Studio",
-    status: "accepted",
-    appliedDate: "2024-01-10",
-    earnings: 1500,
-  },
-  {
-    id: 3,
-    jobTitle: "Data Analyst",
-    company: "Analytics Inc",
-    status: "completed",
-    appliedDate: "2024-01-05",
-    earnings: 2000,
-  },
-]
 
 export default function DashboardPage() {
   const { userProfile, loading } = useAuth()
   const [stats, setStats] = useState({
-    applicationsSubmitted: 5,
-    applicationsAccepted: 2,
-    totalEarnings: 6500,
-    currentWeekEarnings: 500,
-    completedJobs: 3,
-    averageRating: 4.8,
-    hoursWorked: 120,
-    activeJobs: 2,
+    applicationsSubmitted: 0,
+    applicationsAccepted: 0,
+    totalEarnings: 0,
+    currentWeekEarnings: 0,
+    completedJobs: 0,
+    averageRating: 0,
+    hoursWorked: 0,
+    activeJobs: 0,
   })
 
-  // Use sample data for demonstration
-  const recentApplications = sampleApplications
+  const recentApplications = []
 
   if (loading) {
     return (
@@ -105,18 +77,15 @@ export default function DashboardPage() {
     }
   }
 
-  const successRate =
-    stats.applicationsSubmitted > 0 ? Math.round((stats.applicationsAccepted / stats.applicationsSubmitted) * 100) : 0
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Welcome back, {userProfile?.fullName || "User"}!</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Welcome back, {userProfile.fullName}!</h1>
         <p className="text-gray-600 mt-2">Here's an overview of your work activity</p>
       </div>
 
       {/* Account Status */}
-      {!userProfile?.isActivated && (
+      {!userProfile.isActivated && (
         <Card className="mb-8 border-orange-200 bg-orange-50">
           <CardHeader>
             <CardTitle className="flex items-center text-orange-800">
@@ -191,30 +160,21 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentApplications.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-600 mb-4">No applications yet</p>
-                  <Link href="/jobs">
-                    <Button>Browse Jobs</Button>
-                  </Link>
-                </div>
-              ) : (
-                recentApplications.map((application) => (
-                  <div key={application.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <h4 className="font-medium">{application.jobTitle}</h4>
-                      <p className="text-sm text-gray-600">{application.company}</p>
-                      <p className="text-xs text-gray-500">Applied: {application.appliedDate}</p>
-                    </div>
-                    <div className="flex flex-col items-end space-y-2">
-                      <Badge className={getStatusColor(application.status)}>{getStatusText(application.status)}</Badge>
-                      {application.earnings > 0 && (
-                        <span className="text-sm font-medium text-green-600">${application.earnings.toFixed(2)}</span>
-                      )}
-                    </div>
+              {recentApplications.map((application) => (
+                <div key={application.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex-1">
+                    <h4 className="font-medium">{application.jobTitle}</h4>
+                    <p className="text-sm text-gray-600">{application.company}</p>
+                    <p className="text-xs text-gray-500">Applied: {application.appliedDate}</p>
                   </div>
-                ))
-              )}
+                  <div className="flex flex-col items-end space-y-2">
+                    <Badge className={getStatusColor(application.status)}>{getStatusText(application.status)}</Badge>
+                    {application.earnings > 0 && (
+                      <span className="text-sm font-medium text-green-600">${application.earnings.toFixed(2)}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
             <div className="mt-4">
               <Link href="/applications">
@@ -236,9 +196,9 @@ export default function DashboardPage() {
             <div>
               <div className="flex justify-between text-sm mb-2">
                 <span>Application Success Rate</span>
-                <span>{successRate}%</span>
+                <span>0%</span>
               </div>
-              <Progress value={successRate} />
+              <Progress value={0} />
             </div>
 
             <div>
@@ -251,11 +211,11 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-2 gap-4 pt-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{stats.hoursWorked}</div>
+                <div className="text-2xl font-bold text-blue-600">0</div>
                 <div className="text-xs text-gray-600">Hours Worked</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{stats.averageRating}</div>
+                <div className="text-2xl font-bold text-green-600">0</div>
                 <div className="text-xs text-gray-600">Avg Rating</div>
               </div>
             </div>

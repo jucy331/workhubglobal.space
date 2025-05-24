@@ -7,71 +7,17 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+// Make sure these components exist in your project
+import { Select } from "@/components/ui/select"
 import { ArrowLeft, Calendar, DollarSign, Search } from "lucide-react"
 import Link from "next/link"
-
-// Sample data for demonstration
-const sampleApplications = [
-  {
-    id: 1,
-    jobTitle: "Frontend Developer",
-    company: "Tech Corp",
-    status: "pending",
-    description: "Build responsive web applications using React and TypeScript",
-    appliedDate: "2024-01-15",
-    category: "Development",
-    earnings: 0,
-  },
-  {
-    id: 2,
-    jobTitle: "UI/UX Designer",
-    company: "Design Studio",
-    status: "accepted",
-    description: "Create user-centered designs for mobile and web applications",
-    appliedDate: "2024-01-10",
-    category: "Design",
-    earnings: 1500,
-  },
-  {
-    id: 3,
-    jobTitle: "Data Analyst",
-    company: "Analytics Inc",
-    status: "completed",
-    description: "Analyze customer data and create insights for business decisions",
-    appliedDate: "2024-01-05",
-    category: "Analytics",
-    earnings: 2000,
-  },
-  {
-    id: 4,
-    jobTitle: "Content Writer",
-    company: "Media Group",
-    status: "rejected",
-    description: "Write engaging content for various digital platforms",
-    appliedDate: "2024-01-01",
-    category: "Writing",
-    earnings: 0,
-  },
-  {
-    id: 5,
-    jobTitle: "Project Manager",
-    company: "Startup Hub",
-    status: "in_progress",
-    description: "Manage cross-functional teams and deliver projects on time",
-    appliedDate: "2024-01-12",
-    category: "Management",
-    earnings: 3000,
-  },
-]
 
 export default function ApplicationsPage() {
   const { userProfile, loading } = useAuth()
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
 
-  // Use sample data for demonstration
-  const applications = sampleApplications
+  const applications = []
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -116,9 +62,9 @@ export default function ApplicationsPage() {
   })
 
   const groupedApplications = {
-    active: filteredApplications.filter((app) => ["pending", "accepted", "in_progress"].includes(app.status)),
-    completed: filteredApplications.filter((app) => app.status === "completed"),
-    rejected: filteredApplications.filter((app) => app.status === "rejected"),
+    active: [],
+    completed: [],
+    rejected: [],
   }
 
   if (loading) {
@@ -167,18 +113,13 @@ export default function ApplicationsPage() {
                 className="pl-10"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="accepted">Accepted</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="rejected">Not Selected</SelectItem>
-              </SelectContent>
+            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full md:w-48">
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="accepted">Accepted</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="rejected">Not Selected</option>
             </Select>
           </div>
         </CardContent>
@@ -187,9 +128,9 @@ export default function ApplicationsPage() {
       {/* Applications Tabs */}
       <Tabs defaultValue="active" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="active">Active ({groupedApplications.active.length})</TabsTrigger>
-          <TabsTrigger value="completed">Completed ({groupedApplications.completed.length})</TabsTrigger>
-          <TabsTrigger value="rejected">Not Selected ({groupedApplications.rejected.length})</TabsTrigger>
+          <TabsTrigger value="active">Active (0)</TabsTrigger>
+          <TabsTrigger value="completed">Completed (0)</TabsTrigger>
+          <TabsTrigger value="rejected">Not Selected (0)</TabsTrigger>
         </TabsList>
 
         <TabsContent value="active" className="space-y-4">
