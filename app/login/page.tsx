@@ -29,7 +29,7 @@ export default function LoginPage() {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (!authLoading && user && userProfile) {
+    if (user && userProfile) {
       router.push(redirectUrl)
     }
   }, [user, userProfile, router, redirectUrl])
