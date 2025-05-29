@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Briefcase, CheckCircle, DollarSign, FileText, Star, Users } from "lucide-react"
+import { Briefcase, CheckCircle, DollarSign, FileText, Star, Users, Gift } from "lucide-react"
 import Link from "next/link"
+import { useToast } from "@/hooks/use-toast"
 
 // Sample data for demonstration
 const sampleApplications = []
@@ -30,11 +31,66 @@ export default function DashboardPage() {
 
   const [activationDialogOpen, setActivationDialogOpen] = useState(false)
   const [isActivated, setIsActivated] = useState(false)
+  const [surveyCompleted, setSurveyCompleted] = useState(false)
+
+  const [referralStats, setReferralStats] = useState({
+    totalReferrals: 0,
+    activatedReferrals: 0,
+    pendingReferrals: 0,
+    referralEarnings: 0,
+  })
+  const [showReferralLinks, setShowReferralLinks] = useState(false)
+
+  const { toast } = useToast()
 
   useEffect(() => {
     const activationStatus = localStorage.getItem("account_activated")
     if (activationStatus === "true") {
       setIsActivated(true)
+    }
+
+    // Check survey completion and load earnings
+    const surveyStatus = localStorage.getItem("welcome_survey_completed")
+    if (surveyStatus === "true") {
+      setSurveyCompleted(true)
+    }
+
+    // Load user earnings from localStorage (in a real app, this would come from the server)
+    const userEarnings = Number.parseFloat(localStorage.getItem("user_earnings") || "0")
+
+    // Process referral earnings if user just activated
+    const urlParams = new URLSearchParams(window.location.search)
+    const justActivated = urlParams.get("activated") === "true"
+
+    if (justActivated) {
+      // Check if this user was referred and process referral bonus
+      const userProfile = JSON.parse(localStorage.getItem("user_profile") || "{}")
+      if (userProfile.referredBy) {
+        // Award referral bonus to the referrer
+        const referralEarnings = Number.parseFloat(localStorage.getItem("referral_earnings") || "0")
+        localStorage.setItem("referral_earnings", (referralEarnings + 1).toString())
+
+        // Update referral stats
+        const currentStats = JSON.parse(
+          localStorage.getItem("user_referral_stats") ||
+            '{"totalReferrals":0,"activatedReferrals":0,"pendingReferrals":0,"referralEarnings":0}',
+        )
+        currentStats.activatedReferrals += 1
+        currentStats.referralEarnings += 1
+        localStorage.setItem("user_referral_stats", JSON.stringify(currentStats))
+      }
+    }
+
+    setStats((prev) => ({
+      ...prev,
+      totalEarnings: userEarnings + Number.parseFloat(localStorage.getItem("referral_earnings") || "0"),
+      currentWeekEarnings: userEarnings,
+    }))
+
+    // Load referral stats
+    const referralData = localStorage.getItem("user_referral_stats")
+    if (referralData) {
+      setReferralStats(JSON.parse(referralData))
     }
   }, [])
 
@@ -101,12 +157,71 @@ export default function DashboardPage() {
   const successRate =
     stats.applicationsSubmitted > 0 ? Math.round((stats.applicationsAccepted / stats.applicationsSubmitted) * 100) : 0
 
+  const canWithdraw = stats.totalEarnings >= 50
+
+  const generateReferralCode = () => {
+    return userProfile?.fullName?.replace(/\s+/g, "").toLowerCase() + Math.random().toString(36).substr(2, 6)
+  }
+
+  const referralCode = generateReferralCode()
+  const referralLink = `${window.location.origin}/register?ref=${referralCode}`
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast({
+        title: "Copied!",
+        description: "Referral link copied to clipboard.",
+      })
+    } catch (err) {
+      toast({
+        title: "Copy failed",
+        description: "Please copy the link manually.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const shareReferral = (platform: string) => {
+    const message = `Join me on WorkHub Global and start earning money from home! Use my referral link: ${referralLink}`
+
+    switch (platform) {
+      case "whatsapp":
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, "_blank")
+        break
+      case "facebook":
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`, "_blank")
+        break
+      case "twitter":
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`, "_blank")
+        break
+      case "email":
+        window.open(`mailto:?subject=Join WorkHub Global&body=${encodeURIComponent(message)}`, "_blank")
+        break
+    }
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Welcome back, {userProfile?.fullName || "User"}!</h1>
         <p className="text-gray-600 mt-2">Here's an overview of your work activity</p>
       </div>
+
+      {/* Survey Completion Notification */}
+      {surveyCompleted && stats.totalEarnings > 0 && (
+        <Card className="mb-8 border-green-200 bg-green-50">
+          <CardHeader>
+            <CardTitle className="flex items-center text-green-800">
+              <Gift className="h-5 w-5 mr-2" />
+              Survey Completed! 🎉
+            </CardTitle>
+            <CardDescription className="text-green-700">
+              Thank you for completing the welcome survey. $1.50 has been added to your account.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
 
       {/* Account Status */}
       {!userProfile?.isActivated && (
@@ -128,6 +243,27 @@ export default function DashboardPage() {
         </Card>
       )}
 
+      {/* Withdrawal Notice */}
+      {stats.totalEarnings > 0 && stats.totalEarnings < 50 && (
+        <Card className="mb-8 border-blue-200 bg-blue-50">
+          <CardHeader>
+            <CardTitle className="flex items-center text-blue-800">
+              <DollarSign className="h-5 w-5 mr-2" />
+              Earnings Update
+            </CardTitle>
+            <CardDescription className="text-blue-700">
+              You have ${stats.totalEarnings.toFixed(2)} in your account. Minimum withdrawal amount is $50.00.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center space-x-4">
+              <Progress value={(stats.totalEarnings / 50) * 100} className="flex-1" />
+              <span className="text-sm font-medium text-blue-800">${(50 - stats.totalEarnings).toFixed(2)} to go</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stats Overview */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         <Card>
@@ -137,7 +273,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">${stats.totalEarnings.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">+${stats.currentWeekEarnings.toFixed(2)} this week</p>
+            <p className="text-xs text-muted-foreground">
+              {canWithdraw ? "Ready for withdrawal" : `$${(50 - stats.totalEarnings).toFixed(2)} until withdrawal`}
+            </p>
           </CardContent>
         </Card>
 
@@ -242,6 +380,14 @@ export default function DashboardPage() {
               <Progress value={85} />
             </div>
 
+            <div>
+              <div className="flex justify-between text-sm mb-2">
+                <span>Withdrawal Progress</span>
+                <span>{Math.min(100, (stats.totalEarnings / 50) * 100).toFixed(0)}%</span>
+              </div>
+              <Progress value={Math.min(100, (stats.totalEarnings / 50) * 100)} />
+            </div>
+
             <div className="grid grid-cols-2 gap-4 pt-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">{stats.hoursWorked}</div>
@@ -269,7 +415,7 @@ export default function DashboardPage() {
           <CardDescription>Common tasks and shortcuts</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3 mb-6">
             <Link href="/jobs">
               <Button variant="outline" className="w-full h-20 flex flex-col">
                 <Briefcase className="h-6 w-6 mb-2" />
@@ -282,6 +428,126 @@ export default function DashboardPage() {
                 Profile Settings
               </Button>
             </Link>
+            {canWithdraw && (
+              <Button
+                variant="outline"
+                className="w-full h-20 flex flex-col bg-green-50 border-green-200 hover:bg-green-100"
+              >
+                <DollarSign className="h-6 w-6 mb-2 text-green-600" />
+                <span className="text-green-600">Request Withdrawal</span>
+              </Button>
+            )}
+          </div>
+
+          {/* Referral Section */}
+          <div className="border-t pt-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Referral Program</h3>
+                <p className="text-sm text-gray-600">Earn $1.00 for each friend who activates their account</p>
+              </div>
+              <Badge className="bg-green-100 text-green-800">$1 per referral</Badge>
+            </div>
+
+            {/* Referral Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="text-center p-3 bg-blue-50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-600">{referralStats.totalReferrals}</div>
+                <div className="text-xs text-blue-600">Total Referrals</div>
+              </div>
+              <div className="text-center p-3 bg-green-50 rounded-lg">
+                <div className="text-2xl font-bold text-green-600">{referralStats.activatedReferrals}</div>
+                <div className="text-xs text-green-600">Activated</div>
+              </div>
+              <div className="text-center p-3 bg-yellow-50 rounded-lg">
+                <div className="text-2xl font-bold text-yellow-600">{referralStats.pendingReferrals}</div>
+                <div className="text-xs text-yellow-600">Pending</div>
+              </div>
+              <div className="text-center p-3 bg-purple-50 rounded-lg">
+                <div className="text-2xl font-bold text-purple-600">${referralStats.referralEarnings.toFixed(2)}</div>
+                <div className="text-xs text-purple-600">Earned</div>
+              </div>
+            </div>
+
+            {/* Referral Link */}
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Your Referral Link</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={referralLink}
+                    readOnly
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
+                  />
+                  <Button onClick={() => copyToClipboard(referralLink)} variant="outline" size="sm">
+                    Copy
+                  </Button>
+                </div>
+              </div>
+
+              {/* Share Buttons */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Share via</label>
+                <div className="flex gap-2 flex-wrap">
+                  <Button
+                    onClick={() => shareReferral("whatsapp")}
+                    variant="outline"
+                    size="sm"
+                    className="bg-green-50 border-green-200 hover:bg-green-100"
+                  >
+                    WhatsApp
+                  </Button>
+                  <Button
+                    onClick={() => shareReferral("facebook")}
+                    variant="outline"
+                    size="sm"
+                    className="bg-blue-50 border-blue-200 hover:bg-blue-100"
+                  >
+                    Facebook
+                  </Button>
+                  <Button
+                    onClick={() => shareReferral("twitter")}
+                    variant="outline"
+                    size="sm"
+                    className="bg-sky-50 border-sky-200 hover:bg-sky-100"
+                  >
+                    Twitter
+                  </Button>
+                  <Button
+                    onClick={() => shareReferral("email")}
+                    variant="outline"
+                    size="sm"
+                    className="bg-gray-50 border-gray-200 hover:bg-gray-100"
+                  >
+                    Email
+                  </Button>
+                </div>
+              </div>
+
+              {/* Referral Instructions */}
+              <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+                <h4 className="font-medium text-gray-900 mb-2">How it works:</h4>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li className="flex items-start">
+                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Share your unique referral link with friends and family</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>They sign up using your link and create an account</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>When they activate their account ($5 fee), you earn $1.00</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Earnings are added instantly to your account balance</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

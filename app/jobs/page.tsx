@@ -13,6 +13,7 @@ import {
   Zap,
   Briefcase,
   CheckCircle,
+  Gift,
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -565,6 +566,7 @@ export default function JobsPage() {
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
   const [activeCategory, setActiveCategory] = useState("all")
   const [isInitialized, setIsInitialized] = useState(false)
+  const [surveyCompleted, setSurveyCompleted] = useState(false)
 
   // Memoize expensive computations
   const { jobsByCategory, categories, featuredJobs } = useMemo(() => {
@@ -589,6 +591,12 @@ export default function JobsPage() {
     const activationStatus = localStorage.getItem("account_activated")
     if (activationStatus === "true") {
       setIsActivated(true)
+    }
+
+    // Check survey completion status
+    const surveyStatus = localStorage.getItem("welcome_survey_completed")
+    if (surveyStatus === "true") {
+      setSurveyCompleted(true)
     }
 
     // Check if returning from payment
@@ -621,6 +629,10 @@ export default function JobsPage() {
       setSelectedJobId(jobId)
       setActivationDialogOpen(true)
     }
+  }
+
+  const handleStartSurvey = () => {
+    router.push("/survey/welcome")
   }
 
   const handlePaymentRedirect = () => {
@@ -671,8 +683,7 @@ export default function JobsPage() {
 
         <div className="container mx-auto max-w-6xl relative z-10">
           <div className="text-center">
-            
-                        <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl mb-8 text-blue-100 max-w-3xl mx-auto leading-relaxed">
               Welcome back, {userProfile.fullName}! Browse legitimate online opportunities with flexible hours and
               competitive pay.
             </p>
@@ -715,6 +726,80 @@ export default function JobsPage() {
           </div>
         </div>
       </section>
+
+      {/* Welcome Survey Section */}
+      {!surveyCompleted && (
+        <section className="py-8 px-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200">
+          <div className="container mx-auto max-w-4xl">
+            <div className="bg-white rounded-xl shadow-lg border border-green-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center mr-4">
+                      <Gift className="h-6 w-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Welcome Survey - Earn $1.50!</h3>
+                      <p className="text-green-100">
+                        Help us understand your preferences • 2 minutes • One-time opportunity
+                      </p>
+                    </div>
+                  </div>
+                  <Badge className="bg-yellow-400 text-yellow-900 font-semibold">Limited Time</Badge>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <div className="grid md:grid-cols-2 gap-6 items-center">
+                  <div>
+                    <h4 className="font-semibold text-lg mb-3 text-gray-900">Quick Survey About:</h4>
+                    <ul className="space-y-2 text-sm text-gray-600">
+                      <li className="flex items-center">
+                        <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                        Your experience with online work platforms
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                        Types of jobs you're interested in
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                        Your availability and preferences
+                      </li>
+                      <li className="flex items-center">
+                        <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
+                        Platform features you'd like to see
+                      </li>
+                    </ul>
+                    <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                      <p className="text-sm text-green-800">
+                        <strong>Note:</strong> Minimum withdrawal amount is $50. Your survey earnings will be added to
+                        your account balance.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-center">
+                    <div className="mb-4">
+                      <div className="text-3xl font-bold text-green-600 mb-2">$1.50</div>
+                      <div className="text-sm text-gray-600">Instant payment upon completion</div>
+                    </div>
+                    <Button
+                      size="lg"
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-3"
+                      onClick={handleStartSurvey}
+                    >
+                      Start Survey
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                    <p className="text-xs text-gray-500 mt-2">Takes approximately 2 minutes to complete</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Featured Jobs Section */}
       {featuredJobs.length > 0 && (
