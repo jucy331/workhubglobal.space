@@ -30,6 +30,7 @@ export default function RegisterPage() {
   const [referralCode, setReferralCode] = useState<string | null>(null)
 
   useEffect(() => {
+  if (searchParams) {
     const refCode = searchParams.get("ref")
     if (refCode) {
       setReferralCode(refCode)
