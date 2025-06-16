@@ -18,20 +18,18 @@ import {
   UserCheck,
   MessageCircle,
   DollarSign,
-  TrendingUp,
   Search,
   Filter,
   RefreshCw,
   Download,
   Settings,
   Eye,
-  Edit,
-  Trash2,
   CheckCircle,
   XCircle,
+  Activity,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { firebaseAdminService, type FirebaseUser } from "@/lib/firebase-admin"
+import { firebaseAdminService, type FirebaseUser, type PlatformStats } from "@/lib/firebase-admin"
 import { AdminChat } from "@/components/admin-chat"
 
 export default function AdminDashboard() {
@@ -41,18 +39,24 @@ export default function AdminDashboard() {
   const [adminSession, setAdminSession] = useState<any>(null)
   const [users, setUsers] = useState<FirebaseUser[]>([])
   const [filteredUsers, setFilteredUsers] = useState<FirebaseUser[]>([])
-  const [userStats, setUserStats] = useState({
+  const [platformStats, setPlatformStats] = useState<PlatformStats>({
     totalUsers: 0,
     activeUsers: 0,
     pendingActivations: 0,
     newUsersToday: 0,
     newUsersThisWeek: 0,
+    totalRevenue: 0,
+    totalWithdrawals: 0,
+    activeJobs: 0,
+    completedJobs: 0,
+    pendingWithdrawals: 0,
   })
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [roleFilter, setRoleFilter] = useState("all")
+  const [activeTab, setActiveTab] = useState("overview")
 
   useEffect(() => {
     const authStatus = localStorage.getItem("admin_authenticated")
@@ -98,15 +102,24 @@ export default function AdminDashboard() {
     setFilteredUsers(filtered)
   }, [users, searchTerm, statusFilter, roleFilter])
 
-  const loadRealTimeData = () => {
+  const loadRealTimeData = async () => {
+    console.log("Loading real-time data from Firebase...")
+
     // Subscribe to real-time user data
     const unsubscribeUsers = firebaseAdminService.subscribeToUsers((userData) => {
+      console.log("Received user data:", userData.length, "users")
       setUsers(userData)
       setLoading(false)
     })
 
-    // Load user statistics
-    firebaseAdminService.getUserStats().then(setUserStats)
+    // Load real platform statistics
+    try {
+      const stats = await firebaseAdminService.getPlatformStats()
+      console.log("Loaded platform stats:", stats)
+      setPlatformStats(stats)
+    } catch (error) {
+      console.error("Error loading platform stats:", error)
+    }
 
     return () => {
       unsubscribeUsers()
@@ -116,13 +129,15 @@ export default function AdminDashboard() {
   const handleRefresh = async () => {
     setRefreshing(true)
     try {
-      const stats = await firebaseAdminService.getUserStats()
-      setUserStats(stats)
+      console.log("Refreshing platform data...")
+      const stats = await firebaseAdminService.getPlatformStats()
+      setPlatformStats(stats)
       toast({
         title: "Data Refreshed",
         description: "Dashboard data has been updated with the latest information.",
       })
     } catch (error) {
+      console.error("Refresh error:", error)
       toast({
         title: "Refresh Failed",
         description: "Failed to refresh data. Please try again.",
@@ -145,16 +160,21 @@ export default function AdminDashboard() {
 
   const handleActivateUser = async (uid: string) => {
     try {
+      console.log("Activating user:", uid)
       const success = await firebaseAdminService.activateUser(uid)
       if (success) {
         toast({
           title: "User Activated",
           description: "User account has been activated successfully.",
         })
+        // Refresh stats
+        const stats = await firebaseAdminService.getPlatformStats()
+        setPlatformStats(stats)
       } else {
         throw new Error("Failed to activate user")
       }
     } catch (error) {
+      console.error("Activation error:", error)
       toast({
         title: "Error",
         description: "Failed to activate user account.",
@@ -165,16 +185,21 @@ export default function AdminDashboard() {
 
   const handleSuspendUser = async (uid: string) => {
     try {
+      console.log("Suspending user:", uid)
       const success = await firebaseAdminService.suspendUser(uid)
       if (success) {
         toast({
           title: "User Suspended",
           description: "User account has been suspended.",
         })
+        // Refresh stats
+        const stats = await firebaseAdminService.getPlatformStats()
+        setPlatformStats(stats)
       } else {
         throw new Error("Failed to suspend user")
       }
     } catch (error) {
+      console.error("Suspension error:", error)
       toast({
         title: "Error",
         description: "Failed to suspend user account.",
@@ -185,6 +210,7 @@ export default function AdminDashboard() {
 
   const handleUpdateUserRole = async (uid: string, role: string) => {
     try {
+      console.log("Updating user role:", uid, "to", role)
       const success = await firebaseAdminService.updateUser(uid, { role: role as any })
       if (success) {
         toast({
@@ -195,6 +221,7 @@ export default function AdminDashboard() {
         throw new Error("Failed to update role")
       }
     } catch (error) {
+      console.error("Role update error:", error)
       toast({
         title: "Error",
         description: "Failed to update user role.",
@@ -213,7 +240,7 @@ export default function AdminDashboard() {
           user.isActivated ? "Active" : "Inactive",
           user.role || "user",
           user.createdAt?.toDate?.()?.toLocaleDateString() || "N/A",
-          user.activatedAt || "N/A",
+          user.activatedAt?.toDate?.()?.toLocaleDateString() || "N/A",
         ].join(","),
       ),
     ].join("\n")
@@ -230,6 +257,10 @@ export default function AdminDashboard() {
       title: "Export Complete",
       description: "User data has been exported to CSV file.",
     })
+  }
+
+  const navigateToTab = (tab: string) => {
+    setActiveTab(tab)
   }
 
   if (!isAuthenticated) {
@@ -283,7 +314,7 @@ export default function AdminDashboard() {
       </header>
 
       <div className="p-6">
-        {/* Stats Overview */}
+        {/* Real Stats Overview */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -291,9 +322,9 @@ export default function AdminDashboard() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{userStats.totalUsers.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{platformStats.totalUsers.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
-                +{userStats.newUsersToday} today, +{userStats.newUsersThisWeek} this week
+                +{platformStats.newUsersToday} today, +{platformStats.newUsersThisWeek} this week
               </p>
             </CardContent>
           </Card>
@@ -304,10 +335,12 @@ export default function AdminDashboard() {
               <UserCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{userStats.activeUsers}</div>
+              <div className="text-2xl font-bold">{platformStats.activeUsers}</div>
               <p className="text-xs text-muted-foreground">
-                {userStats.totalUsers > 0 ? Math.round((userStats.activeUsers / userStats.totalUsers) * 100) : 0}%
-                activation rate
+                {platformStats.totalUsers > 0
+                  ? Math.round((platformStats.activeUsers / platformStats.totalUsers) * 100)
+                  : 0}
+                % activation rate
               </p>
             </CardContent>
           </Card>
@@ -318,7 +351,7 @@ export default function AdminDashboard() {
               <AlertCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{userStats.pendingActivations}</div>
+              <div className="text-2xl font-bold">{platformStats.pendingActivations}</div>
               <p className="text-xs text-muted-foreground">Require manual review</p>
             </CardContent>
           </Card>
@@ -329,8 +362,8 @@ export default function AdminDashboard() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">$15,420</div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
+              <div className="text-2xl font-bold">${platformStats.totalRevenue.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">From {platformStats.activeUsers} activations</p>
             </CardContent>
           </Card>
 
@@ -340,14 +373,14 @@ export default function AdminDashboard() {
               <Briefcase className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12</div>
+              <div className="text-2xl font-bold">{platformStats.activeJobs}</div>
               <p className="text-xs text-muted-foreground">Across all categories</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
@@ -359,7 +392,7 @@ export default function AdminDashboard() {
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
-              {/* Recent Activity */}
+              {/* Recent Activity with REAL data */}
               <Card>
                 <CardHeader>
                   <CardTitle>Recent User Activity</CardTitle>
@@ -383,11 +416,17 @@ export default function AdminDashboard() {
                         </Badge>
                       </div>
                     ))}
+                    {users.length === 0 && (
+                      <div className="text-center py-4">
+                        <Activity className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-600">No user activity yet</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Quick Actions */}
+              {/* Functional Quick Actions */}
               <Card>
                 <CardHeader>
                   <CardTitle>Quick Actions</CardTitle>
@@ -398,18 +437,18 @@ export default function AdminDashboard() {
                     <Button
                       variant="outline"
                       className="justify-start h-auto p-4"
-                      onClick={() => document.querySelector('[value="users"]')?.click()}
+                      onClick={() => navigateToTab("users")}
                     >
                       <UserCheck className="h-5 w-5 mr-3" />
                       <div className="text-left">
                         <div className="font-medium">Review Activations</div>
-                        <div className="text-sm text-gray-600">{userStats.pendingActivations} pending</div>
+                        <div className="text-sm text-gray-600">{platformStats.pendingActivations} pending</div>
                       </div>
                     </Button>
                     <Button
                       variant="outline"
                       className="justify-start h-auto p-4"
-                      onClick={() => document.querySelector('[value="support"]')?.click()}
+                      onClick={() => navigateToTab("support")}
                     >
                       <MessageCircle className="h-5 w-5 mr-3" />
                       <div className="text-left">
@@ -420,18 +459,18 @@ export default function AdminDashboard() {
                     <Button
                       variant="outline"
                       className="justify-start h-auto p-4"
-                      onClick={() => document.querySelector('[value="jobs"]')?.click()}
+                      onClick={() => navigateToTab("jobs")}
                     >
                       <Briefcase className="h-5 w-5 mr-3" />
                       <div className="text-left">
                         <div className="font-medium">Manage Jobs</div>
-                        <div className="text-sm text-gray-600">12 active jobs</div>
+                        <div className="text-sm text-gray-600">{platformStats.activeJobs} active jobs</div>
                       </div>
                     </Button>
                     <Button
                       variant="outline"
                       className="justify-start h-auto p-4"
-                      onClick={() => document.querySelector('[value="finance"]')?.click()}
+                      onClick={() => navigateToTab("finance")}
                     >
                       <BarChart3 className="h-5 w-5 mr-3" />
                       <div className="text-left">
@@ -444,18 +483,25 @@ export default function AdminDashboard() {
               </Card>
             </div>
 
-            {/* Growth Chart */}
+            {/* Real-time Statistics */}
             <Card>
               <CardHeader>
-                <CardTitle>User Growth</CardTitle>
-                <CardDescription>User registration and activation trends</CardDescription>
+                <CardTitle>Platform Statistics</CardTitle>
+                <CardDescription>Real-time platform metrics</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
-                  <div className="text-center">
-                    <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">Analytics chart would be displayed here</p>
-                    <p className="text-sm text-gray-500">Integration with charting library needed</p>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{platformStats.totalUsers}</div>
+                    <p className="text-sm text-gray-600">Total Registered Users</p>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">${platformStats.totalRevenue}</div>
+                    <p className="text-sm text-gray-600">Total Revenue Generated</p>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-2xl font-bold text-orange-600">{platformStats.activeJobs}</div>
+                    <p className="text-sm text-gray-600">Active Job Postings</p>
                   </div>
                 </div>
               </CardContent>
@@ -481,11 +527,11 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="jobs">
-            <JobManagement />
+            <JobManagement platformStats={platformStats} />
           </TabsContent>
 
           <TabsContent value="finance">
-            <FinanceManagement />
+            <FinanceManagement platformStats={platformStats} />
           </TabsContent>
 
           <TabsContent value="support">
@@ -501,7 +547,7 @@ export default function AdminDashboard() {
   )
 }
 
-// Enhanced User Management Component with real data
+// Enhanced User Management Component with REAL data
 function UserManagement({
   users,
   allUsers,
@@ -541,6 +587,7 @@ function UserManagement({
     return (
       <div className="flex items-center justify-center p-8">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <p className="ml-4">Loading real user data from Firebase...</p>
       </div>
     )
   }
@@ -615,7 +662,7 @@ function UserManagement({
         </CardContent>
       </Card>
 
-      {/* Users Table */}
+      {/* Users Table with REAL data */}
       <Card>
         <CardHeader>
           <CardTitle>User Accounts</CardTitle>
@@ -628,7 +675,11 @@ function UserManagement({
             {users.length === 0 ? (
               <div className="text-center py-8">
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No users found matching your criteria</p>
+                <p className="text-gray-600">
+                  {allUsers.length === 0
+                    ? "No users found in Firebase database"
+                    : "No users found matching your criteria"}
+                </p>
               </div>
             ) : (
               users.map((user) => (
@@ -701,52 +752,8 @@ function UserManagement({
   )
 }
 
-// Enhanced Job Management Component
-function JobManagement() {
-  const [jobs, setJobs] = useState([
-    {
-      id: 1,
-      title: "Product Feedback Survey Specialist",
-      category: "Surveys & Market Research",
-      payRange: "$3-$100 per survey",
-      status: "active",
-      applications: 45,
-      featured: true,
-      createdAt: "2024-01-15",
-      employerId: "emp_001",
-    },
-    {
-      id: 2,
-      title: "AI Chatbot Conversation Trainer",
-      category: "AI & Machine Learning",
-      payRange: "$14-$25 per hour",
-      status: "active",
-      applications: 32,
-      featured: true,
-      createdAt: "2024-01-18",
-      employerId: "emp_002",
-    },
-  ])
-
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-
-  const filteredJobs = jobs.filter((job) => {
-    const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === "all" || job.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
-
-  const handleToggleStatus = (id: number) => {
-    setJobs((prev) =>
-      prev.map((job) => (job.id === id ? { ...job, status: job.status === "active" ? "paused" : "active" } : job)),
-    )
-  }
-
-  const handleToggleFeatured = (id: number) => {
-    setJobs((prev) => prev.map((job) => (job.id === id ? { ...job, featured: !job.featured } : job)))
-  }
-
+// Enhanced Job Management with real data
+function JobManagement({ platformStats }: { platformStats: PlatformStats }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -760,89 +767,46 @@ function JobManagement() {
         </Button>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="text-sm font-medium">Search Jobs</label>
-              <div className="relative mt-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Search by title or category..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Status</label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="mt-1">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="paused">Paused</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Active Jobs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{platformStats.activeJobs}</div>
+            <p className="text-xs text-muted-foreground">Currently posted</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Completed Jobs</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{platformStats.completedJobs}</div>
+            <p className="text-xs text-muted-foreground">Successfully finished</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-medium">Job Applications</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">0</div>
+            <p className="text-xs text-muted-foreground">Total applications</p>
+          </CardContent>
+        </Card>
+      </div>
 
-      {/* Jobs List */}
       <Card>
         <CardHeader>
-          <CardTitle>Job Postings</CardTitle>
-          <CardDescription>
-            Showing {filteredJobs.length} of {jobs.length} jobs
-          </CardDescription>
+          <CardTitle>Job Listings</CardTitle>
+          <CardDescription>All job postings on the platform</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {filteredJobs.map((job) => (
-              <div key={job.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3">
-                    <div>
-                      <h4 className="font-medium">{job.title}</h4>
-                      <p className="text-sm text-gray-600">{job.category}</p>
-                      <p className="text-xs text-gray-500">{job.payRange}</p>
-                      <p className="text-xs text-gray-500">Created: {job.createdAt}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
-                    <p className="text-sm font-medium">{job.applications} applications</p>
-                    {job.featured && <Badge className="bg-yellow-100 text-yellow-800">Featured</Badge>}
-                  </div>
-                  <Badge
-                    className={job.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}
-                  >
-                    {job.status}
-                  </Badge>
-                  <div className="flex space-x-2">
-                    <Button size="sm" variant="outline" onClick={() => handleToggleFeatured(job.id)}>
-                      {job.featured ? "Unfeature" : "Feature"}
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleToggleStatus(job.id)}>
-                      {job.status === "active" ? "Pause" : "Activate"}
-                    </Button>
-                    <Button size="sm" variant="ghost">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="text-center py-8">
+            <Briefcase className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600">No jobs found in database</p>
+            <p className="text-sm text-gray-500">Jobs will appear here once created</p>
           </div>
         </CardContent>
       </Card>
@@ -850,42 +814,13 @@ function JobManagement() {
   )
 }
 
-// Enhanced Finance Management Component
-function FinanceManagement() {
-  const [withdrawals, setWithdrawals] = useState([
-    {
-      id: 1,
-      user: "John Doe",
-      email: "john.doe@email.com",
-      amount: 75.0,
-      method: "PayPal",
-      status: "pending",
-      requestDate: "2024-01-20",
-    },
-    {
-      id: 2,
-      user: "Sarah Wilson",
-      email: "sarah.wilson@email.com",
-      amount: 125.5,
-      method: "Bank Transfer",
-      status: "completed",
-      requestDate: "2024-01-18",
-    },
-  ])
-
-  const handleApproveWithdrawal = (id: number) => {
-    setWithdrawals((prev) => prev.map((w) => (w.id === id ? { ...w, status: "approved" } : w)))
-  }
-
-  const handleRejectWithdrawal = (id: number) => {
-    setWithdrawals((prev) => prev.map((w) => (w.id === id ? { ...w, status: "rejected" } : w)))
-  }
-
+// Enhanced Finance Management with REAL data
+function FinanceManagement({ platformStats }: { platformStats: PlatformStats }) {
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold text-gray-900">Finance Management</h2>
-        <p className="text-gray-600">Manage payments and withdrawals</p>
+        <p className="text-gray-600">Real platform financial data</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-4">
@@ -894,8 +829,8 @@ function FinanceManagement() {
             <CardTitle className="text-sm font-medium">Total Platform Revenue</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$15,420.50</div>
-            <p className="text-xs text-muted-foreground">+12% from last month</p>
+            <div className="text-2xl font-bold">${platformStats.totalRevenue.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">From {platformStats.activeUsers} activations</p>
           </CardContent>
         </Card>
         <Card>
@@ -903,8 +838,8 @@ function FinanceManagement() {
             <CardTitle className="text-sm font-medium">Pending Withdrawals</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$275.00</div>
-            <p className="text-xs text-muted-foreground">8 requests</p>
+            <div className="text-2xl font-bold">{platformStats.pendingWithdrawals}</div>
+            <p className="text-xs text-muted-foreground">Requests pending</p>
           </CardContent>
         </Card>
         <Card>
@@ -912,8 +847,8 @@ function FinanceManagement() {
             <CardTitle className="text-sm font-medium">User Earnings</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$8,945.25</div>
-            <p className="text-xs text-muted-foreground">Total paid out</p>
+            <div className="text-2xl font-bold">${platformStats.totalWithdrawals.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">Total user earnings</p>
           </CardContent>
         </Card>
         <Card>
@@ -921,63 +856,40 @@ function FinanceManagement() {
             <CardTitle className="text-sm font-medium">Platform Commission</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$2,310.15</div>
-            <p className="text-xs text-muted-foreground">15% average</p>
+            <div className="text-2xl font-bold">15%</div>
+            <p className="text-xs text-muted-foreground">Standard rate</p>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Withdrawal Requests</CardTitle>
-          <CardDescription>Pending and completed withdrawal requests</CardDescription>
+          <CardTitle>Financial Overview</CardTitle>
+          <CardDescription>Real-time financial metrics</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {withdrawals.map((withdrawal) => (
-              <div key={withdrawal.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex-1">
-                  <h4 className="font-medium">{withdrawal.user}</h4>
-                  <p className="text-sm text-gray-600">{withdrawal.email}</p>
-                  <p className="text-sm text-gray-600">{withdrawal.method}</p>
-                  <p className="text-xs text-gray-500">Requested: {withdrawal.requestDate}</p>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <div className="text-right">
-                    <p className="text-lg font-bold">${withdrawal.amount.toFixed(2)}</p>
-                  </div>
-                  <Badge
-                    className={
-                      withdrawal.status === "completed"
-                        ? "bg-green-100 text-green-800"
-                        : withdrawal.status === "pending"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : withdrawal.status === "approved"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-red-100 text-red-800"
-                    }
-                  >
-                    {withdrawal.status}
-                  </Badge>
-                  {withdrawal.status === "pending" && (
-                    <div className="flex space-x-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleApproveWithdrawal(withdrawal.id)}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Approve
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleRejectWithdrawal(withdrawal.id)}>
-                        <XCircle className="h-4 w-4 mr-1" />
-                        Reject
-                      </Button>
-                    </div>
-                  )}
-                </div>
+            <div className="flex justify-between items-center p-4 border rounded-lg">
+              <div>
+                <h4 className="font-medium">Activation Revenue</h4>
+                <p className="text-sm text-gray-600">${platformStats.activeUsers} × $5 per activation</p>
               </div>
-            ))}
+              <div className="text-right">
+                <p className="text-lg font-bold">${platformStats.totalRevenue.toLocaleString()}</p>
+                <p className="text-xs text-gray-500">Total earned</p>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center p-4 border rounded-lg">
+              <div>
+                <h4 className="font-medium">Pending Activations</h4>
+                <p className="text-sm text-gray-600">Potential revenue from pending users</p>
+              </div>
+              <div className="text-right">
+                <p className="text-lg font-bold">${(platformStats.pendingActivations * 5).toLocaleString()}</p>
+                <p className="text-xs text-gray-500">Potential revenue</p>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -985,7 +897,7 @@ function FinanceManagement() {
   )
 }
 
-// Enhanced Settings Management Component
+// Settings Management Component
 function SettingsManagement() {
   const [settings, setSettings] = useState({
     activationFee: 5.0,
@@ -1047,26 +959,6 @@ function SettingsManagement() {
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Referral Bonus ($)</label>
-              <Input
-                type="number"
-                value={settings.referralBonus}
-                onChange={(e) => handleSettingChange("referralBonus", Number.parseFloat(e.target.value))}
-                className="mt-1"
-                step="0.01"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Survey Reward ($)</label>
-              <Input
-                type="number"
-                value={settings.surveyReward}
-                onChange={(e) => handleSettingChange("surveyReward", Number.parseFloat(e.target.value))}
-                className="mt-1"
-                step="0.01"
-              />
-            </div>
-            <div>
               <label className="text-sm font-medium">Platform Commission (%)</label>
               <Input
                 type="number"
@@ -1097,19 +989,6 @@ function SettingsManagement() {
                 onClick={() => handleSettingChange("emailNotifications", !settings.emailNotifications)}
               >
                 {settings.emailNotifications ? "Enabled" : "Disabled"}
-              </Button>
-            </div>
-            <div className="flex items-center justify-between">
-              <div>
-                <label className="text-sm font-medium">Auto-approve Withdrawals</label>
-                <p className="text-xs text-gray-600">Automatically approve withdrawal requests under $100</p>
-              </div>
-              <Button
-                variant={settings.autoApproveWithdrawals ? "default" : "outline"}
-                size="sm"
-                onClick={() => handleSettingChange("autoApproveWithdrawals", !settings.autoApproveWithdrawals)}
-              >
-                {settings.autoApproveWithdrawals ? "Enabled" : "Disabled"}
               </Button>
             </div>
             <div className="flex items-center justify-between">
