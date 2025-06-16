@@ -11,16 +11,9 @@ import {
   where,
   getDocs,
   serverTimestamp,
+  increment,
 } from "firebase/firestore"
-
-let db: any = null
-
-try {
-  const firebaseModule = require("@/lib/firebase")
-  db = firebaseModule.db
-} catch (error) {
-  console.warn("Firebase not available:", error)
-}
+import { db } from "@/lib/firebase"
 
 export interface FirebaseUser {
   uid: string
@@ -153,7 +146,7 @@ class FirebaseAdminService {
     })
   }
 
-  // Chat System
+  // Support Ticket System
   async createSupportTicket(
     userId: string,
     userName: string,
@@ -217,26 +210,13 @@ class FirebaseAdminService {
       await updateDoc(ticketRef, {
         lastMessageAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        messageCount: (await this.getMessageCount(ticketId)) + 1,
+        messageCount: increment(1),
       })
 
       return true
     } catch (error) {
       console.error("Error sending message:", error)
       return false
-    }
-  }
-
-  private async getMessageCount(ticketId: string): Promise<number> {
-    if (!db) return 0
-
-    try {
-      const messagesRef = collection(db, "support_tickets", ticketId, "messages")
-      const snapshot = await getDocs(messagesRef)
-      return snapshot.size
-    } catch (error) {
-      console.error("Error getting message count:", error)
-      return 0
     }
   }
 

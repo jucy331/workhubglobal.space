@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MessageCircle, Send, User, Filter } from "lucide-react"
+import { MessageCircle, Send, User, Filter, Clock, Search, RefreshCw } from "lucide-react"
 import { firebaseAdminService, type SupportTicket, type ChatMessage } from "@/lib/firebase-admin"
 import { useToast } from "@/hooks/use-toast"
 
@@ -21,7 +21,9 @@ export function AdminChat() {
   const [newMessage, setNewMessage] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [priorityFilter, setPriorityFilter] = useState<string>("all")
+  const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -36,16 +38,29 @@ export function AdminChat() {
   useEffect(() => {
     let filtered = tickets
 
+    // Apply search filter
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase()
+      filtered = filtered.filter(
+        (ticket) =>
+          ticket.subject.toLowerCase().includes(searchLower) ||
+          ticket.userName.toLowerCase().includes(searchLower) ||
+          ticket.userEmail.toLowerCase().includes(searchLower),
+      )
+    }
+
+    // Apply status filter
     if (statusFilter !== "all") {
       filtered = filtered.filter((ticket) => ticket.status === statusFilter)
     }
 
+    // Apply priority filter
     if (priorityFilter !== "all") {
       filtered = filtered.filter((ticket) => ticket.priority === priorityFilter)
     }
 
     setFilteredTickets(filtered)
-  }, [tickets, statusFilter, priorityFilter])
+  }, [tickets, statusFilter, priorityFilter, searchTerm])
 
   useEffect(() => {
     if (!selectedTicket) return
@@ -109,6 +124,16 @@ export function AdminChat() {
     }
   }
 
+  const handleRefresh = async () => {
+    setRefreshing(true)
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    setRefreshing(false)
+    toast({
+      title: "Refreshed",
+      description: "Support tickets have been refreshed.",
+    })
+  }
+
   const getStatusColor = (status: SupportTicket["status"]) => {
     switch (status) {
       case "open":
@@ -145,6 +170,21 @@ export function AdminChat() {
     return date.toLocaleString()
   }
 
+  const getTimeAgo = (timestamp: any) => {
+    if (!timestamp) return ""
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
+
+    if (diffMins < 1) return "Just now"
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    return `${diffDays}d ago`
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -161,35 +201,83 @@ export function AdminChat() {
           <p className="text-gray-600">Manage customer support tickets</p>
         </div>
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <Filter className="h-4 w-4 text-gray-500" />
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="open">Open</SelectItem>
-                <SelectItem value="in-progress">In Progress</SelectItem>
-                <SelectItem value="resolved">Resolved</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Priority</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="urgent">Urgent</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center space-x-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
+            <span>Refresh</span>
+          </Button>
+          <Badge variant="secondary">{tickets.length} Total Tickets</Badge>
         </div>
       </div>
+
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Filter className="h-5 w-5" />
+            <span>Filters</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-4">
+            <div>
+              <label className="text-sm font-medium">Search</label>
+              <div className="relative mt-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search tickets..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Status</label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="in-progress">In Progress</SelectItem>
+                  <SelectItem value="resolved">Resolved</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Priority</label>
+              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Priority</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-end">
+              <div className="text-sm">
+                <p className="font-medium">Showing {filteredTickets.length} tickets</p>
+                <p className="text-gray-600">
+                  {filteredTickets.filter((t) => t.status === "open").length} open,{" "}
+                  {filteredTickets.filter((t) => t.status === "in-progress").length} in progress
+                </p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 md:grid-cols-3">
         {/* Tickets List */}
@@ -232,8 +320,14 @@ export function AdminChat() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>{ticket.messageCount} messages</span>
-                          <span>{formatTimestamp(ticket.lastMessageAt)}</span>
+                          <div className="flex items-center space-x-2">
+                            <MessageCircle className="h-3 w-3" />
+                            <span>{ticket.messageCount} messages</span>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Clock className="h-3 w-3" />
+                            <span>{getTimeAgo(ticket.lastMessageAt)}</span>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -259,8 +353,24 @@ export function AdminChat() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Select
+                      value={selectedTicket.priority}
+                      onValueChange={(value) => {
+                        // Update priority logic here
+                      }}
+                    >
+                      <SelectTrigger className="w-24">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="urgent">Urgent</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select
                       value={selectedTicket.status}
-                      onValueChange={(value) => updateTicketStatus(selectedTicket.id, value as SupportTicket["status"])}
+                      onValueChange={(value) => updateTicketStatus(selectedTicket.id, value as any)}
                     >
                       <SelectTrigger className="w-32">
                         <SelectValue />
@@ -314,11 +424,21 @@ export function AdminChat() {
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder="Type your response..."
                       onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                      disabled={selectedTicket.status === "closed"}
                     />
-                    <Button onClick={sendMessage} disabled={!newMessage.trim()} size="sm">
+                    <Button
+                      onClick={sendMessage}
+                      disabled={!newMessage.trim() || selectedTicket.status === "closed"}
+                      size="sm"
+                    >
                       <Send className="h-4 w-4" />
                     </Button>
                   </div>
+                  {selectedTicket.status === "closed" && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      This ticket is closed. Change status to reopen conversation.
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>

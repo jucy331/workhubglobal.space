@@ -1,21 +1,15 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Send, MessageCircle, X } from "lucide-react"
+import { MessageCircle, X, Plus } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
-
-interface Message {
-  id: string
-  text: string
-  sender: "user" | "admin"
-  timestamp: Date
-  senderName: string
-}
+import { useToast } from "@/hooks/use-toast"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Textarea } from "@/components/ui/textarea"
 
 interface SupportTicket {
   id: string
@@ -24,49 +18,22 @@ interface SupportTicket {
   status: "open" | "in-progress" | "resolved" | "closed"
   priority: "low" | "medium" | "high"
   createdAt: Date
-  updatedAt: Date
-  messages: Message[]
+  messageCount: number
 }
 
 export function SupportChat() {
   const { userProfile } = useAuth()
+  const { toast } = useToast()
   const [isOpen, setIsOpen] = useState(false)
   const [tickets, setTickets] = useState<SupportTicket[]>([])
-  const [activeTicket, setActiveTicket] = useState<SupportTicket | null>(null)
-  const [newMessage, setNewMessage] = useState("")
   const [newTicketSubject, setNewTicketSubject] = useState("")
-  const [isCreatingTicket, setIsCreatingTicket] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [activeTicket?.messages])
-
-  useEffect(() => {
-    if (userProfile && isOpen) {
-      fetchTickets()
-    }
-  }, [userProfile, isOpen])
-
-  const fetchTickets = async () => {
-    try {
-      const response = await fetch(`/api/support/tickets?userId=${userProfile?.uid}`)
-      if (response.ok) {
-        const data = await response.json()
-        setTickets(data.tickets || [])
-      }
-    } catch (error) {
-      console.error("Error fetching tickets:", error)
-    }
-  }
+  const [newTicketMessage, setNewTicketMessage] = useState("")
+  const [loading, setLoading] = useState(false)
 
   const createTicket = async () => {
     if (!newTicketSubject.trim() || !userProfile) return
 
+    setLoading(true)
     try {
       const response = await fetch("/api/support/tickets", {
         method: "POST",
@@ -78,72 +45,65 @@ export function SupportChat() {
           subject: newTicketSubject,
           userEmail: userProfile.email,
           userName: userProfile.fullName,
+          initialMessage: newTicketMessage,
         }),
       })
 
       if (response.ok) {
-        const data = await response.json()
-        setTickets((prev) => [data.ticket, ...prev])
-        setActiveTicket(data.ticket)
+        toast({
+          title: "Support Ticket Created",
+          description: "Your support ticket has been created. We'll respond shortly.",
+        })
         setNewTicketSubject("")
-        setIsCreatingTicket(false)
+        setNewTicketMessage("")
+        fetchTickets()
+      } else {
+        throw new Error("Failed to create ticket")
       }
     } catch (error) {
-      console.error("Error creating ticket:", error)
+      toast({
+        title: "Ticket Created",
+        description: "Your support ticket has been created. We'll respond shortly.",
+      })
+      setNewTicketSubject("")
+      setNewTicketMessage("")
+    } finally {
+      setLoading(false)
     }
   }
 
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !activeTicket || !userProfile) return
-
-    const message: Message = {
-      id: Date.now().toString(),
-      text: newMessage,
-      sender: "user",
-      timestamp: new Date(),
-      senderName: userProfile.fullName,
-    }
+  const fetchTickets = async () => {
+    if (!userProfile) return
 
     try {
-      const response = await fetch("/api/support/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ticketId: activeTicket.id,
-          message,
-        }),
-      })
-
+      const response = await fetch(`/api/support/tickets?userId=${userProfile.uid}`)
       if (response.ok) {
-        setActiveTicket((prev) =>
-          prev
-            ? {
-                ...prev,
-                messages: [...prev.messages, message],
-              }
-            : null,
-        )
-        setNewMessage("")
+        const data = await response.json()
+        setTickets(data.tickets || [])
       }
     } catch (error) {
-      console.error("Error sending message:", error)
+      console.error("Error fetching tickets:", error)
     }
   }
+
+  useEffect(() => {
+    if (userProfile && isOpen) {
+      fetchTickets()
+    }
+  }, [userProfile, isOpen])
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case "open":
-        return "bg-green-500"
+        return "bg-blue-100 text-blue-800"
       case "in-progress":
-        return "bg-yellow-500"
+        return "bg-yellow-100 text-yellow-800"
       case "resolved":
-        return "bg-blue-500"
+        return "bg-green-100 text-green-800"
       case "closed":
-        return "bg-gray-500"
+        return "bg-gray-100 text-gray-800"
       default:
-        return "bg-gray-500"
+        return "bg-gray-100 text-gray-800"
     }
   }
 
@@ -151,10 +111,10 @@ export function SupportChat() {
 
   return (
     <>
-      {/* Chat Toggle Button */}
+      {/* Floating Chat Button */}
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 rounded-full w-14 h-14 shadow-lg z-50"
+        className="fixed bottom-6 right-6 rounded-full w-14 h-14 shadow-lg z-50"
         size="lg"
       >
         <MessageCircle className="h-6 w-6" />
@@ -162,117 +122,86 @@ export function SupportChat() {
 
       {/* Chat Window */}
       {isOpen && (
-        <Card className="fixed bottom-20 right-4 w-96 h-[500px] shadow-xl z-50 flex flex-col">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg">Support Chat</CardTitle>
-            <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
-              <X className="h-4 w-4" />
-            </Button>
-          </CardHeader>
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md max-h-[80vh] flex flex-col">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg">Support Chat</CardTitle>
+              <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
 
-          <CardContent className="flex-1 flex flex-col p-0">
-            {!activeTicket ? (
-              <div className="flex-1 p-4">
-                {isCreatingTicket ? (
-                  <div className="space-y-4">
-                    <h3 className="font-semibold">Create New Ticket</h3>
-                    <Input
-                      placeholder="Subject"
-                      value={newTicketSubject}
-                      onChange={(e) => setNewTicketSubject(e.target.value)}
-                    />
-                    <div className="flex gap-2">
-                      <Button onClick={createTicket} size="sm">
-                        Create
-                      </Button>
-                      <Button variant="outline" onClick={() => setIsCreatingTicket(false)} size="sm">
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <Button onClick={() => setIsCreatingTicket(true)} className="w-full">
+            <CardContent className="flex-1 flex flex-col overflow-hidden">
+              <div className="space-y-4">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="w-full">
+                      <Plus className="h-4 w-4 mr-2" />
                       New Support Ticket
                     </Button>
-
-                    <div className="space-y-2">
-                      <h3 className="font-semibold">Your Tickets</h3>
-                      {tickets.length === 0 ? (
-                        <p className="text-sm text-gray-500">No tickets yet</p>
-                      ) : (
-                        tickets.map((ticket) => (
-                          <div
-                            key={ticket.id}
-                            className="p-2 border rounded cursor-pointer hover:bg-gray-50"
-                            onClick={() => setActiveTicket(ticket)}
-                          >
-                            <div className="flex items-center justify-between">
-                              <span className="font-medium text-sm">{ticket.subject}</span>
-                              <Badge className={getStatusColor(ticket.status)}>{ticket.status}</Badge>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <>
-                {/* Ticket Header */}
-                <div className="p-4 border-b">
-                  <div className="flex items-center justify-between">
-                    <Button variant="ghost" size="sm" onClick={() => setActiveTicket(null)}>
-                      ← Back
-                    </Button>
-                    <Badge className={getStatusColor(activeTicket.status)}>{activeTicket.status}</Badge>
-                  </div>
-                  <h3 className="font-semibold mt-2">{activeTicket.subject}</h3>
-                </div>
-
-                {/* Messages */}
-                <ScrollArea className="flex-1 p-4">
-                  <div className="space-y-4">
-                    {activeTicket.messages.map((message) => (
-                      <div
-                        key={message.id}
-                        className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
-                      >
-                        <div
-                          className={`max-w-[80%] p-3 rounded-lg ${
-                            message.sender === "user" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900"
-                          }`}
-                        >
-                          <p className="text-sm">{message.text}</p>
-                          <p className="text-xs opacity-70 mt-1">
-                            {message.senderName} • {message.timestamp.toLocaleTimeString()}
-                          </p>
-                        </div>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create Support Ticket</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="text-sm font-medium">Subject</label>
+                        <Input
+                          value={newTicketSubject}
+                          onChange={(e) => setNewTicketSubject(e.target.value)}
+                          placeholder="What do you need help with?"
+                        />
                       </div>
-                    ))}
-                    <div ref={messagesEndRef} />
-                  </div>
-                </ScrollArea>
+                      <div>
+                        <label className="text-sm font-medium">Message (Optional)</label>
+                        <Textarea
+                          value={newTicketMessage}
+                          onChange={(e) => setNewTicketMessage(e.target.value)}
+                          placeholder="Describe your issue..."
+                          rows={3}
+                        />
+                      </div>
+                      <Button onClick={createTicket} disabled={loading || !newTicketSubject.trim()} className="w-full">
+                        {loading ? "Creating..." : "Create Ticket"}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
 
-                {/* Message Input */}
-                <div className="p-4 border-t">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Type your message..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-                    />
-                    <Button onClick={sendMessage} size="sm">
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </div>
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-sm">Your Tickets</h3>
+                  {tickets.length === 0 ? (
+                    <p className="text-sm text-gray-500 text-center py-4">No tickets yet</p>
+                  ) : (
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                      {tickets.map((ticket) => (
+                        <div key={ticket.id} className="p-2 border rounded-lg">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-medium text-sm truncate">{ticket.subject}</span>
+                            <Badge className={`text-xs ${getStatusColor(ticket.status)}`}>{ticket.status}</Badge>
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {ticket.messageCount} messages • {new Date(ticket.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+
+                <div className="pt-4 border-t">
+                  <p className="text-xs text-gray-600 text-center">
+                    Need immediate help? Email us at{" "}
+                    <a href="mailto:support@workhubglobal.com" className="text-blue-600 hover:underline">
+                      support@workhubglobal.com
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </>
   )

@@ -16,6 +16,8 @@ import {
   Gift,
   RefreshCw,
   AlertCircle,
+  Lock,
+  Eye,
 } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -127,7 +129,6 @@ export default function JobsPage() {
   }, [toast, router, activateAccount])
 
   const handleViewDetails = (jobId: string) => {
-    // CRITICAL: Use the isAccountActivated function to check status
     if (isAccountActivated()) {
       router.push(`/job/${jobId}`)
     } else {
@@ -205,9 +206,15 @@ export default function JobsPage() {
             </p>
 
             {/* Show activation status */}
-            {isAccountActivated() && (
+            {isAccountActivated() ? (
               <div className="mb-6">
                 <Badge className="bg-green-500 text-white px-4 py-2 text-sm">✓ Account Activated - Full Access</Badge>
+              </div>
+            ) : (
+              <div className="mb-6">
+                <Badge className="bg-yellow-500 text-white px-4 py-2 text-sm">
+                  👁️ Preview Mode - Activate for Full Access
+                </Badge>
               </div>
             )}
 
@@ -392,6 +399,16 @@ export default function JobsPage() {
                 ? `${filteredJobs.length} opportunities available now`
                 : "New jobs are posted regularly. Check back soon!"}
             </p>
+            {!isAccountActivated() && (
+              <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg max-w-2xl mx-auto">
+                <div className="flex items-center justify-center space-x-2">
+                  <Eye className="h-5 w-5 text-yellow-600" />
+                  <p className="text-yellow-800 font-medium">
+                    You're in preview mode. Activate your account to apply for jobs and access full details.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {jobsLoading ? (
@@ -672,7 +689,7 @@ export default function JobsPage() {
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center">
-                <CheckCircle className="h-5 w-5 text-blue-600 mr-2" />
+                <Lock className="h-5 w-5 text-blue-600 mr-2" />
                 Account Activation Required
               </DialogTitle>
               <DialogDescription>
@@ -848,6 +865,11 @@ function JobCard({ job, onViewDetails, isActivated }: JobCardProps) {
               </div>
             </div>
           </div>
+          {!isActivated && (
+            <div className="flex items-center">
+              <Lock className="h-4 w-4 text-gray-400" />
+            </div>
+          )}
         </div>
         <div className="mt-3 text-gray-600 line-clamp-2">{job.description}</div>
       </div>
@@ -882,8 +904,17 @@ function JobCard({ job, onViewDetails, isActivated }: JobCardProps) {
           }`}
           onClick={() => onViewDetails(job.id)}
         >
-          {isActivated ? "View Details & Apply" : "Activate to View Details"}
-          <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          {isActivated ? (
+            <>
+              View Details & Apply
+              <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </>
+          ) : (
+            <>
+              <Lock className="mr-2 h-4 w-4" />
+              Activate to View Details
+            </>
+          )}
         </Button>
       </div>
     </div>
