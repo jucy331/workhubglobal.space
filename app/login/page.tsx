@@ -61,7 +61,7 @@ export default function LoginPage() {
     try {
       console.log("Attempting login with:", { email: formData.email })
       await login(formData.email, formData.password)
-      router.push(redirectUrl)
+      router.push("/jobs") // Change this to router.push("/welcome") for new users
     } catch (error: any) {
       console.error("Error logging in:", error)
 

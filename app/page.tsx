@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Globe, Clock, Zap } from "lucide-react"
+import { ArrowRight, Globe, Clock, Zap, FileText, Users, Briefcase, Star, Shield, CheckCircle } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 export default function Home() {
   return (
@@ -111,76 +112,163 @@ export default function Home() {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Popular Job Categories</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Job Categories</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Browse through the most in-demand remote job categories
+              Specialized opportunities in surveys and AI training with competitive pay
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Link
-              href="/jobs?category=writing"
-              className="bg-white p-6 rounded-lg border hover:border-primary hover:shadow-md transition-all text-center"
+              href="/jobs?category=surveys"
+              className="bg-white p-8 rounded-xl border hover:border-primary hover:shadow-lg transition-all text-center group"
             >
-              <h3 className="font-medium">Writing & Content</h3>
-              <p className="text-sm text-gray-500 mt-1">124 jobs</p>
+              <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <FileText className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Survey Specialist</h3>
+              <p className="text-sm text-gray-600 mb-3">Product feedback, market research, user experience testing</p>
+              <p className="text-primary font-medium">$3-$100 per survey</p>
+              <Badge className="mt-2 bg-green-100 text-green-800">High Demand</Badge>
             </Link>
 
             <Link
-              href="/jobs?category=admin"
-              className="bg-white p-6 rounded-lg border hover:border-primary hover:shadow-md transition-all text-center"
+              href="/jobs?category=ai-training"
+              className="bg-white p-8 rounded-xl border hover:border-primary hover:shadow-lg transition-all text-center group"
             >
-              <h3 className="font-medium">Admin & Support</h3>
-              <p className="text-sm text-gray-500 mt-1">86 jobs</p>
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Zap className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">AI Training</h3>
+              <p className="text-sm text-gray-600 mb-3">Chatbot training, content evaluation, data labeling</p>
+              <p className="text-primary font-medium">$12-$25 per hour</p>
+              <Badge className="mt-2 bg-blue-100 text-blue-800">Growing Field</Badge>
             </Link>
 
             <Link
-              href="/jobs?category=design"
-              className="bg-white p-6 rounded-lg border hover:border-primary hover:shadow-md transition-all text-center"
+              href="/jobs?category=data-entry"
+              className="bg-white p-8 rounded-xl border hover:border-primary hover:shadow-lg transition-all text-center group"
             >
-              <h3 className="font-medium">Design & Creative</h3>
-              <p className="text-sm text-gray-500 mt-1">93 jobs</p>
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Users className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Data Processing</h3>
+              <p className="text-sm text-gray-600 mb-3">Data entry, transcription, content moderation</p>
+              <p className="text-primary font-medium">$11-$17 per hour</p>
+              <Badge className="mt-2 bg-orange-100 text-orange-800">Steady Work</Badge>
             </Link>
 
             <Link
-              href="/jobs?category=development"
-              className="bg-white p-6 rounded-lg border hover:border-primary hover:shadow-md transition-all text-center"
+              href="/create-job"
+              className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 rounded-xl text-white text-center group hover:from-blue-700 hover:to-purple-700 transition-all"
             >
-              <h3 className="font-medium">Development</h3>
-              <p className="text-sm text-gray-500 mt-1">157 jobs</p>
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                <Briefcase className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">Post a Job</h3>
+              <p className="text-sm text-blue-100 mb-3">Need work done? Create your own job posting</p>
+              <p className="text-white font-medium">Start hiring →</p>
             </Link>
+          </div>
+        </div>
+      </section>
 
-            <Link
-              href="/jobs?category=customer-support"
-              className="bg-white p-6 rounded-lg border hover:border-primary hover:shadow-md transition-all text-center"
-            >
-              <h3 className="font-medium">Customer Support</h3>
-              <p className="text-sm text-gray-500 mt-1">78 jobs</p>
-            </Link>
+      {/* Testimonials Section */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Workers Say</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Join thousands of satisfied workers earning money from home
+            </p>
+          </div>
 
-            <Link
-              href="/jobs?category=marketing"
-              className="bg-white p-6 rounded-lg border hover:border-primary hover:shadow-md transition-all text-center"
-            >
-              <h3 className="font-medium">Marketing</h3>
-              <p className="text-sm text-gray-500 mt-1">112 jobs</p>
-            </Link>
+          <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto">
+            <div className="bg-gray-50 p-6 rounded-xl">
+              <div className="flex items-center mb-4">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star key={star} className="h-4 w-4 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <p className="text-gray-700 mb-4">
+                "I've earned over $500 in my first month doing surveys and AI training tasks. The payments are always on
+                time and the work is genuinely interesting."
+              </p>
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-medium">
+                  S
+                </div>
+                <div className="ml-3">
+                  <p className="font-medium">Sarah M.</p>
+                  <p className="text-sm text-gray-600">Remote Worker, California</p>
+                </div>
+              </div>
+            </div>
 
-            <Link
-              href="/jobs?category=education"
-              className="bg-white p-6 rounded-lg border hover:border-primary hover:shadow-md transition-all text-center"
-            >
-              <h3 className="font-medium">Education</h3>
-              <p className="text-sm text-gray-500 mt-1">64 jobs</p>
-            </Link>
+            <div className="bg-gray-50 p-6 rounded-xl">
+              <div className="flex items-center mb-4">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star key={star} className="h-4 w-4 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <p className="text-gray-700 mb-4">
+                "Perfect for supplementing my income. I work 2-3 hours in the evenings and make an extra $300-400 per
+                month. Highly recommend!"
+              </p>
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-medium">
+                  M
+                </div>
+                <div className="ml-3">
+                  <p className="font-medium">Mike J.</p>
+                  <p className="text-sm text-gray-600">Part-time Worker, Texas</p>
+                </div>
+              </div>
+            </div>
 
-            <Link
-              href="/jobs"
-              className="bg-white p-6 rounded-lg border hover:border-primary hover:shadow-md transition-all text-center"
-            >
-              <h3 className="font-medium">View All Categories</h3>
-              <p className="text-sm text-gray-500 mt-1">800+ jobs</p>
-            </Link>
+            <div className="bg-gray-50 p-6 rounded-xl">
+              <div className="flex items-center mb-4">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star key={star} className="h-4 w-4 text-yellow-400 fill-current" />
+                ))}
+              </div>
+              <p className="text-gray-700 mb-4">
+                "The AI training jobs are fascinating and well-paid. I've learned so much while earning money. The
+                platform is professional and trustworthy."
+              </p>
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-medium">
+                  A
+                </div>
+                <div className="ml-3">
+                  <p className="font-medium">Alex R.</p>
+                  <p className="text-sm text-gray-600">AI Trainer, New York</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Trust Badges */}
+          <div className="mt-16 text-center">
+            <p className="text-gray-600 mb-8">Trusted by workers worldwide</p>
+            <div className="flex justify-center items-center space-x-8 opacity-60">
+              <div className="flex items-center space-x-2">
+                <Shield className="h-6 w-6 text-green-600" />
+                <span className="font-medium">Secure Payments</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-6 w-6 text-blue-600" />
+                <span className="font-medium">Verified Jobs</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Users className="h-6 w-6 text-purple-600" />
+                <span className="font-medium">50K+ Workers</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Star className="h-6 w-6 text-yellow-500" />
+                <span className="font-medium">4.9/5 Rating</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>

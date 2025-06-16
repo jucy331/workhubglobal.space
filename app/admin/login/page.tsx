@@ -1,60 +1,65 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/contexts/auth-context"
 import { Shield, Eye, EyeOff } from "lucide-react"
 
 export default function AdminLogin() {
   const router = useRouter()
   const { toast } = useToast()
+  const { login, userProfile, loading } = useAuth()
   const [credentials, setCredentials] = useState({
-    username: "",
+    email: "",
     password: "",
   })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  useEffect(() => {
+    if (!loading && userProfile?.role === "admin") {
+      router.push("/admin/dashboard")
+    }
+  }, [userProfile, loading, router])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate authentication
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    try {
+      await login(credentials.email, credentials.password)
 
-    // Simple admin credentials check (in real app, this would be server-side)
-    if (credentials.username === "admin" && credentials.password === "admin123") {
-      localStorage.setItem("admin_authenticated", "true")
-      localStorage.setItem(
-        "admin_session",
-        JSON.stringify({
-          username: credentials.username,
-          loginTime: new Date().toISOString(),
-          role: "super_admin",
-        }),
-      )
-
-      toast({
-        title: "Login Successful",
-        description: "Welcome to the admin dashboard.",
-      })
-
-      router.push("/admin/dashboard")
-    } else {
+      // Check if user is admin after login
+      const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
+      if (userData.role === "admin") {
+        toast({
+          title: "Login Successful",
+          description: "Welcome to the admin dashboard.",
+        })
+        router.push("/admin/dashboard")
+      } else {
+        toast({
+          title: "Access Denied",
+          description: "You don't have admin privileges.",
+          variant: "destructive",
+        })
+      }
+    } catch (error: any) {
+      console.error("Admin login error:", error)
       toast({
         title: "Login Failed",
-        description: "Invalid username or password.",
+        description: error.message || "Invalid credentials.",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
-
-    setIsLoading(false)
   }
 
   return (
@@ -72,14 +77,14 @@ export default function AdminLogin() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="email">Admin Email</Label>
                 <Input
-                  id="username"
-                  type="text"
+                  id="email"
+                  type="email"
                   required
-                  value={credentials.username}
-                  onChange={(e) => setCredentials((prev) => ({ ...prev, username: e.target.value }))}
-                  placeholder="Enter admin username"
+                  value={credentials.email}
+                  onChange={(e) => setCredentials((prev) => ({ ...prev, email: e.target.value }))}
+                  placeholder="admin@workhubglobal.com"
                   className="mt-1"
                 />
               </div>
@@ -122,13 +127,11 @@ export default function AdminLogin() {
               </Button>
             </form>
 
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-              <h4 className="font-medium text-gray-900 mb-2">Demo Credentials:</h4>
-              <p className="text-sm text-gray-600">
-                Username: <code className="bg-gray-200 px-1 rounded">admin</code>
-              </p>
-              <p className="text-sm text-gray-600">
-                Password: <code className="bg-gray-200 px-1 rounded">admin123</code>
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <h4 className="font-medium text-blue-900 mb-2">Admin Access Required</h4>
+              <p className="text-sm text-blue-700">
+                Only authorized administrators can access this portal. Please contact your system administrator if you
+                need access.
               </p>
             </div>
           </CardContent>

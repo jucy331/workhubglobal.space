@@ -74,7 +74,7 @@ export default function CreateAccountPage() {
         description: "Welcome to WorkHub Global. You can now browse and apply for jobs.",
       })
 
-      router.push(redirectUrl)
+      router.push("/welcome") // Redirect to welcome flow instead of jobs
     } catch (error: any) {
       console.error("Error creating account:", error)
 

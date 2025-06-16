@@ -1,22 +1,25 @@
 "use client"
 
 import type React from "react"
-
 import { createContext, useContext, useEffect, useState } from "react"
-import {
-  type User,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  updateProfile,
-} from "firebase/auth"
-import { doc, setDoc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore"
-import { auth, db } from "@/lib/firebase"
 import { useRouter } from "next/navigation"
 
+// Import Firebase types and functions with error handling
+let firebaseAuth: any = null
+let firebaseFirestore: any = null
+
+try {
+  const firebaseAuthModule = require("firebase/auth")
+  const firestoreModule = require("firebase/firestore")
+
+  firebaseAuth = firebaseAuthModule
+  firebaseFirestore = firestoreModule
+} catch (error) {
+  console.warn("Firebase modules not available:", error)
+}
+
 interface AuthContextType {
-  user: User | null
+  user: any | null
   userProfile: UserProfile | null
   loading: boolean
   isPreview: boolean
@@ -36,18 +39,22 @@ export interface UserProfile {
   createdAt: any
   updatedAt: any
   applications?: string[]
+  role?: "user" | "admin" | "employer"
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // Check if we're in a preview environment
 const isPreviewEnvironment =
-  process.env.NODE_ENV !== "production" ||
-  process.env.VERCEL_ENV === "preview" ||
-  process.env.NEXT_PUBLIC_VERCEL_ENV === "preview"
+  typeof window !== "undefined" &&
+  (process.env.NODE_ENV !== "production" ||
+    process.env.VERCEL_ENV === "preview" ||
+    process.env.NEXT_PUBLIC_VERCEL_ENV === "preview" ||
+    window.location.hostname.includes("vercel.app") ||
+    window.location.hostname.includes("localhost"))
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<any | null>(null)
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [initError, setInitError] = useState<string | null>(null)
@@ -55,41 +62,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter()
 
   useEffect(() => {
-    // Check if we're in a preview environment
+    // Always check for preview environment first
     if (isPreviewEnvironment) {
       console.log("Running in preview environment, using mock authentication")
       setIsPreview(true)
-
-      // For preview, create a mock user profile
-      const mockProfile: UserProfile = {
-        uid: "preview-user-id",
-        email: "preview@example.com",
-        fullName: "Preview User",
-        isActivated: true,
-        activationPending: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        applications: [],
-      }
-
-      setUserProfile(mockProfile)
       setLoading(false)
       return () => {}
     }
 
-    // Check if Firebase auth is available
-    if (!auth) {
-      console.error("Firebase auth not initialized")
-      setInitError("Firebase authentication not initialized. Please check your configuration.")
+    // Try to initialize Firebase auth
+    let auth: any = null
+    let db: any = null
+
+    try {
+      const firebaseModule = require("@/lib/firebase")
+      auth = firebaseModule.auth
+      db = firebaseModule.db
+
+      if (!auth) {
+        throw new Error("Firebase auth not initialized")
+      }
+    } catch (error) {
+      console.error("Firebase initialization error:", error)
+      setInitError("Firebase authentication not available. Running in preview mode.")
+      setIsPreview(true)
       setLoading(false)
       return () => {}
     }
 
     console.log("Setting up auth state listener")
 
-    const unsubscribe = onAuthStateChanged(
+    const unsubscribe = firebaseAuth.onAuthStateChanged(
       auth,
-      async (user) => {
+      async (user: any) => {
         console.log("Auth state changed:", user ? `User logged in: ${user.email}` : "No user")
         setUser(user)
 
@@ -98,26 +103,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             // Fetch user profile from Firestore
             if (db) {
               console.log("Fetching user profile from Firestore")
-              const userDoc = await getDoc(doc(db, "users", user.uid))
+              const userDoc = await firebaseFirestore.getDoc(firebaseFirestore.doc(db, "users", user.uid))
               if (userDoc.exists()) {
                 console.log("User profile found")
                 const profile = userDoc.data() as UserProfile
                 setUserProfile(profile)
 
-                // Store user data in localStorage for consistent access across components
+                // Store user data in localStorage for consistent access
                 localStorage.setItem(
                   "user_data",
                   JSON.stringify({
                     name: profile.fullName,
                     email: profile.email,
+                    role: profile.role || "user",
                   }),
                 )
-
-                // Store activation status
                 localStorage.setItem("account_activated", profile.isActivated.toString())
               } else {
-                console.log("No user profile found in Firestore, creating basic profile from auth user")
-                // Create a basic profile from the auth user if Firestore profile doesn't exist
+                console.log("No user profile found, creating basic profile")
                 const basicProfile: UserProfile = {
                   uid: user.uid,
                   email: user.email || "",
@@ -127,33 +130,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                   createdAt: new Date(),
                   updatedAt: new Date(),
                   applications: [],
+                  role: "user",
                 }
                 setUserProfile(basicProfile)
 
-                // Store basic user data
+                // Create profile in Firestore
+                if (db) {
+                  await firebaseFirestore.setDoc(firebaseFirestore.doc(db, "users", user.uid), {
+                    ...basicProfile,
+                    createdAt: firebaseFirestore.serverTimestamp(),
+                    updatedAt: firebaseFirestore.serverTimestamp(),
+                  })
+                }
+
                 localStorage.setItem(
                   "user_data",
                   JSON.stringify({
                     name: basicProfile.fullName,
                     email: basicProfile.email,
+                    role: "user",
                   }),
                 )
                 localStorage.setItem("account_activated", "false")
               }
-            } else {
-              console.error("Firestore not initialized, using auth user data only")
-              // Fallback to auth user data if Firestore is not available
-              const basicProfile: UserProfile = {
-                uid: user.uid,
-                email: user.email || "",
-                fullName: user.displayName || "User",
-                isActivated: false,
-                activationPending: false,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                applications: [],
-              }
-              setUserProfile(basicProfile)
             }
           } catch (error) {
             console.error("Error fetching user profile:", error)
@@ -167,19 +166,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               createdAt: new Date(),
               updatedAt: new Date(),
               applications: [],
+              role: "user",
             }
             setUserProfile(basicProfile)
           }
         } else {
           setUserProfile(null)
-          // Clear localStorage when user logs out
           localStorage.removeItem("user_data")
           localStorage.removeItem("account_activated")
         }
 
         setLoading(false)
       },
-      (error) => {
+      (error: any) => {
         console.error("Auth state change error:", error)
         setInitError(`Firebase authentication error: ${error.message}`)
         setLoading(false)
@@ -194,9 +193,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = async (email: string, password: string, fullName: string) => {
     if (isPreview) {
-      console.log("Sign up called in preview mode with:", { email, fullName })
-
-      // Simulate successful signup in preview
+      console.log("Sign up called in preview mode")
       const mockProfile: UserProfile = {
         uid: "preview-user-id",
         email,
@@ -206,76 +203,69 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         createdAt: new Date(),
         updatedAt: new Date(),
         applications: [],
+        role: "user",
       }
 
       setUserProfile(mockProfile)
-
-      // Store in localStorage for consistency
       localStorage.setItem(
         "user_data",
         JSON.stringify({
           name: fullName,
           email,
+          role: "user",
         }),
       )
       localStorage.setItem("account_activated", "false")
-
       return
     }
 
-    if (!auth || !db) {
-      throw new Error("Firebase services not initialized. Please check your configuration.")
-    }
-
     try {
-      setLoading(true)
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+      const firebaseModule = require("@/lib/firebase")
+      const auth = firebaseModule.auth
+      const db = firebaseModule.db
+
+      if (!auth || !db) {
+        throw new Error("Firebase services not initialized")
+      }
+
+      const userCredential = await firebaseAuth.createUserWithEmailAndPassword(auth, email, password)
       const user = userCredential.user
 
-      // Update user profile in Firebase Auth
-      await updateProfile(user, {
-        displayName: fullName,
-      })
+      await firebaseAuth.updateProfile(user, { displayName: fullName })
 
-      // Create user document in Firestore
       const userProfile: UserProfile = {
         uid: user.uid,
         email: user.email || email,
         fullName,
         isActivated: false,
         activationPending: false,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        createdAt: firebaseFirestore.serverTimestamp(),
+        updatedAt: firebaseFirestore.serverTimestamp(),
         applications: [],
+        role: "user",
       }
 
-      await setDoc(doc(db, "users", user.uid), userProfile)
+      await firebaseFirestore.setDoc(firebaseFirestore.doc(db, "users", user.uid), userProfile)
       setUserProfile(userProfile)
 
-      // Store in localStorage for consistency
       localStorage.setItem(
         "user_data",
         JSON.stringify({
           name: fullName,
           email,
+          role: "user",
         }),
       )
       localStorage.setItem("account_activated", "false")
-
-      return
     } catch (error) {
       console.error("Error signing up:", error)
       throw error
-    } finally {
-      setLoading(false)
     }
   }
 
   const login = async (email: string, password: string) => {
     if (isPreview) {
-      console.log("Login called in preview mode with:", { email })
-
-      // Simulate successful login in preview
+      console.log("Login called in preview mode")
       const mockProfile: UserProfile = {
         uid: "preview-user-id",
         email,
@@ -285,41 +275,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         createdAt: new Date(),
         updatedAt: new Date(),
         applications: [],
+        role: email.includes("admin") ? "admin" : "user",
       }
 
       setUserProfile(mockProfile)
-
-      // Store in localStorage for consistency
       localStorage.setItem(
         "user_data",
         JSON.stringify({
           name: "Preview User",
           email,
+          role: mockProfile.role,
         }),
       )
       localStorage.setItem("account_activated", "true")
-
       return
     }
 
-    if (!auth) {
-      throw new Error("Firebase services not initialized. Please check your configuration.")
-    }
-
     try {
-      setLoading(true)
-      await signInWithEmailAndPassword(auth, email, password)
+      const firebaseModule = require("@/lib/firebase")
+      const auth = firebaseModule.auth
+
+      if (!auth) {
+        throw new Error("Firebase services not initialized")
+      }
+
+      await firebaseAuth.signInWithEmailAndPassword(auth, email, password)
+      // Profile will be loaded by the auth state listener
     } catch (error) {
       console.error("Error logging in:", error)
       throw error
-    } finally {
-      setLoading(false)
     }
   }
 
   const logout = async () => {
     if (isPreview) {
-      console.log("Logout called in preview mode")
       setUserProfile(null)
       localStorage.removeItem("user_data")
       localStorage.removeItem("account_activated")
@@ -327,12 +316,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return
     }
 
-    if (!auth) {
-      throw new Error("Firebase services not initialized. Please check your configuration.")
-    }
-
     try {
-      await signOut(auth)
+      const firebaseModule = require("@/lib/firebase")
+      const auth = firebaseModule.auth
+
+      if (!auth) {
+        throw new Error("Firebase services not initialized")
+      }
+
+      await firebaseAuth.signOut(auth)
       router.push("/")
     } catch (error) {
       console.error("Error logging out:", error)
@@ -342,56 +334,58 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateUserProfile = async (data: Partial<UserProfile>) => {
     if (isPreview) {
-      console.log("Update profile called in preview mode with:", data)
       const updatedProfile = userProfile ? { ...userProfile, ...data } : null
       setUserProfile(updatedProfile)
 
-      // Update localStorage if fullName or email changed
-      if (updatedProfile && (data.fullName || data.email)) {
+      if (updatedProfile && (data.fullName || data.email || data.role)) {
         localStorage.setItem(
           "user_data",
           JSON.stringify({
             name: updatedProfile.fullName,
             email: updatedProfile.email,
+            role: updatedProfile.role || "user",
           }),
         )
       }
 
-      // Update activation status if changed
       if (data.isActivated !== undefined) {
         localStorage.setItem("account_activated", data.isActivated.toString())
       }
-
       return
     }
 
-    if (!user || !db) {
-      throw new Error("User not authenticated or Firebase not initialized")
+    if (!user) {
+      throw new Error("User not authenticated")
     }
 
     try {
-      const userRef = doc(db, "users", user.uid)
-      await updateDoc(userRef, {
+      const firebaseModule = require("@/lib/firebase")
+      const db = firebaseModule.db
+
+      if (!db) {
+        throw new Error("Firebase not initialized")
+      }
+
+      const userRef = firebaseFirestore.doc(db, "users", user.uid)
+      await firebaseFirestore.updateDoc(userRef, {
         ...data,
-        updatedAt: serverTimestamp(),
+        updatedAt: firebaseFirestore.serverTimestamp(),
       })
 
-      // Update local state
       const updatedProfile = userProfile ? { ...userProfile, ...data } : null
       setUserProfile(updatedProfile)
 
-      // Update localStorage if fullName or email changed
-      if (updatedProfile && (data.fullName || data.email)) {
+      if (updatedProfile && (data.fullName || data.email || data.role)) {
         localStorage.setItem(
           "user_data",
           JSON.stringify({
             name: updatedProfile.fullName,
             email: updatedProfile.email,
+            role: updatedProfile.role || "user",
           }),
         )
       }
 
-      // Update activation status if changed
       if (data.isActivated !== undefined) {
         localStorage.setItem("account_activated", data.isActivated.toString())
       }
