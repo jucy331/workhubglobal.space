@@ -1,34 +1,29 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-// Replace the ADMIN_USERS array with your manual credentials
+// Admin credentials - replace with your secure credentials
 const ADMIN_USERS = [
   {
     id: 1,
-    username: "Workadmin", // Change this to your desired username
-    password: "160960", // Change this to your desired password
+    username: "Workadmin",
+    password: "160960",
     role: "super_admin",
-    email: "samuelgikenyi@gmail.com", // Change this to your email
+    email: "samuelgikenyi@gmail.com",
   },
-  // You can add more admin users here
-  {
-    id: 2,
-    username: "manager",
-    password: "ManagerPass456!",
-    role: "admin",
-    email: "manager@workhubglobal.com",
-  },
+  // You can add more admin users here if needed
 ]
 
 export async function POST(request: NextRequest) {
   try {
-    const { username, password } = await request.json()
+    const { username, password, email } = await request.json()
 
     if (!username || !password) {
       return NextResponse.json({ success: false, message: "Username and password are required" }, { status: 400 })
     }
 
-    // Find admin user with direct password comparison
-    const adminUser = ADMIN_USERS.find((user) => user.username === username && user.password === password)
+    // Find admin user with direct credential comparison
+    const adminUser = ADMIN_USERS.find(
+      (user) => (user.username === username || user.email === username) && user.password === password,
+    )
 
     if (!adminUser) {
       return NextResponse.json({ success: false, message: "Invalid credentials" }, { status: 401 })
@@ -36,18 +31,21 @@ export async function POST(request: NextRequest) {
 
     // Generate session token
     const sessionToken = generateSessionToken()
+    const sessionData = {
+      id: adminUser.id,
+      username: adminUser.username,
+      email: adminUser.email,
+      role: adminUser.role,
+      loginTime: new Date().toISOString(),
+      token: sessionToken,
+    }
 
     return NextResponse.json({
       success: true,
       message: "Login successful",
       role: adminUser.role,
       token: sessionToken,
-      user: {
-        id: adminUser.id,
-        username: adminUser.username,
-        email: adminUser.email,
-        role: adminUser.role,
-      },
+      user: sessionData,
     })
   } catch (error) {
     console.error("Admin auth error:", error)

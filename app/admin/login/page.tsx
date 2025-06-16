@@ -8,53 +8,75 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import { useAuth } from "@/contexts/auth-context"
-import { Shield, Eye, EyeOff } from "lucide-react"
+import { Shield, Eye, EyeOff, User, Mail } from "lucide-react"
 
 export default function AdminLogin() {
   const router = useRouter()
   const { toast } = useToast()
-  const { login, userProfile, loading } = useAuth()
   const [credentials, setCredentials] = useState({
-    email: "",
+    username: "",
     password: "",
   })
+  const [loginMethod, setLoginMethod] = useState<"username" | "email">("username")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
+  // Check if already logged in
   useEffect(() => {
-    if (!loading && userProfile?.role === "admin") {
-      router.push("/admin/dashboard")
+    const adminSession = localStorage.getItem("admin_session")
+    if (adminSession) {
+      try {
+        const session = JSON.parse(adminSession)
+        if (session.role === "super_admin") {
+          router.push("/admin/dashboard")
+        }
+      } catch (error) {
+        localStorage.removeItem("admin_session")
+      }
     }
-  }, [userProfile, loading, router])
+  }, [router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      await login(credentials.email, credentials.password)
+      const response = await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: credentials.username,
+          password: credentials.password,
+        }),
+      })
 
-      // Check if user is admin after login
-      const userData = JSON.parse(localStorage.getItem("user_data") || "{}")
-      if (userData.role === "admin") {
+      const data = await response.json()
+
+      if (data.success) {
+        // Store admin session
+        localStorage.setItem("admin_session", JSON.stringify(data.user))
+        localStorage.setItem("admin_authenticated", "true")
+
         toast({
-          title: "Login Successful",
-          description: "Welcome to the admin dashboard.",
+          title: "Welcome Back!",
+          description: `Logged in as ${data.user.username} (${data.user.role})`,
         })
+
         router.push("/admin/dashboard")
       } else {
         toast({
-          title: "Access Denied",
-          description: "You don't have admin privileges.",
+          title: "Login Failed",
+          description: data.message || "Invalid credentials.",
           variant: "destructive",
         })
       }
     } catch (error: any) {
       console.error("Admin login error:", error)
       toast({
-        title: "Login Failed",
-        description: error.message || "Invalid credentials.",
+        title: "Login Error",
+        description: "Unable to connect to authentication service.",
         variant: "destructive",
       })
     } finally {
@@ -76,15 +98,41 @@ export default function AdminLogin() {
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Login Method Toggle */}
+              <div className="flex rounded-lg bg-gray-100 p-1">
+                <button
+                  type="button"
+                  onClick={() => setLoginMethod("username")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                    loginMethod === "username"
+                      ? "bg-white text-gray-900 shadow-sm"
+                      : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  <User className="h-4 w-4" />
+                  Username
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLoginMethod("email")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                    loginMethod === "email" ? "bg-white text-gray-900 shadow-sm" : "text-gray-600 hover:text-gray-900"
+                  }`}
+                >
+                  <Mail className="h-4 w-4" />
+                  Email
+                </button>
+              </div>
+
               <div>
-                <Label htmlFor="email">Admin Email</Label>
+                <Label htmlFor="username">{loginMethod === "username" ? "Username" : "Email Address"}</Label>
                 <Input
-                  id="email"
-                  type="email"
+                  id="username"
+                  type={loginMethod === "email" ? "email" : "text"}
                   required
-                  value={credentials.email}
-                  onChange={(e) => setCredentials((prev) => ({ ...prev, email: e.target.value }))}
-                  placeholder="admin@workhubglobal.com"
+                  value={credentials.username}
+                  onChange={(e) => setCredentials((prev) => ({ ...prev, username: e.target.value }))}
+                  placeholder={loginMethod === "username" ? "Enter your username" : "Enter your email address"}
                   className="mt-1"
                 />
               </div>
@@ -98,7 +146,7 @@ export default function AdminLogin() {
                     required
                     value={credentials.password}
                     onChange={(e) => setCredentials((prev) => ({ ...prev, password: e.target.value }))}
-                    placeholder="Enter admin password"
+                    placeholder="Enter your password"
                     className="pr-10"
                   />
                   <button
@@ -122,16 +170,25 @@ export default function AdminLogin() {
                     Authenticating...
                   </>
                 ) : (
-                  "Sign In"
+                  "Sign In to Admin Portal"
                 )}
               </Button>
             </form>
 
             <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <h4 className="font-medium text-blue-900 mb-2">Admin Access Required</h4>
+              <h4 className="font-medium text-blue-900 mb-2">🔐 Secure Admin Access</h4>
               <p className="text-sm text-blue-700">
-                Only authorized administrators can access this portal. Please contact your system administrator if you
-                need access.
+                This portal is restricted to authorized administrators only. All login attempts are monitored and
+                logged.
+              </p>
+            </div>
+
+            <div className="mt-4 text-center">
+              <p className="text-xs text-gray-500">
+                Having trouble? Contact system administrator at{" "}
+                <a href="mailto:samuelgikenyi@gmail.com" className="text-blue-600 hover:underline">
+                  samuelgikenyi@gmail.com
+                </a>
               </p>
             </div>
           </CardContent>
