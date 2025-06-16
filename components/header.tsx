@@ -71,18 +71,18 @@ export function Header() {
               </Link>
             )}
             <Link
-              href="/faq"
-              className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors relative group"
-            >
-              FAQ
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
-            </Link>
-            <Link
               href="/support"
               className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors relative group"
             >
               Support
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
+            </Link>
+            <Link
+              href="/faq"
+              className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors relative group"
+            >
+              FAQ
+              <span className="absolute -bottom-1 left-0 w-0.5 bg-blue-600 transition-all group-hover:w-full"></span>
             </Link>
           </nav>
 
@@ -139,18 +139,18 @@ export function Header() {
                 </Link>
               )}
               <Link
-                href="/faq"
-                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-2 py-1"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                FAQ
-              </Link>
-              <Link
                 href="/support"
                 className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-2 py-1"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Support
+              </Link>
+              <Link
+                href="/faq"
+                className="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors px-2 py-1"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                FAQ
               </Link>
               {!isAuthenticated && (
                 <div className="flex flex-col space-y-2 pt-2 border-t border-gray-200">
@@ -173,3 +173,6 @@ export function Header() {
     </header>
   )
 }
+
+// Also export as default for backward compatibility
+export default Header

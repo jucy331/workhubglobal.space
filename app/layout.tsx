@@ -12,6 +12,11 @@ export const metadata: Metadata = {
   title: "WorkHub Global - Find Legitimate Online Jobs",
   description:
     "Discover legitimate online job opportunities with flexible hours and competitive pay. Join thousands of remote workers earning money from home.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
     generator: 'v0.dev'
 }
 
@@ -22,6 +27,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
       <body className={inter.className}>
         <AuthProvider>
           <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">

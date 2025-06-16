@@ -6,34 +6,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  Users,
-  DollarSign,
-  Briefcase,
-  AlertCircle,
-  Shield,
-  LogOut,
-  BarChart3,
-  UserCheck,
-  CreditCard,
-} from "lucide-react"
+import { Users, Briefcase, AlertCircle, Shield, LogOut, BarChart3, UserCheck, MessageCircle } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { firebaseAdminService, type FirebaseUser } from "@/lib/firebase-admin"
+import { AdminChat } from "@/components/admin-chat"
 
 export default function AdminDashboard() {
   const router = useRouter()
   const { toast } = useToast()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [adminSession, setAdminSession] = useState<any>(null)
-  const [stats, setStats] = useState({
+  const [users, setUsers] = useState<FirebaseUser[]>([])
+  const [userStats, setUserStats] = useState({
     totalUsers: 0,
     activeUsers: 0,
     pendingActivations: 0,
-    totalEarnings: 0,
-    totalJobs: 0,
-    completedSurveys: 0,
-    pendingWithdrawals: 0,
-    totalReferrals: 0,
+    newUsersToday: 0,
+    newUsersThisWeek: 0,
   })
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const authStatus = localStorage.getItem("admin_authenticated")
@@ -42,25 +33,25 @@ export default function AdminDashboard() {
     if (authStatus === "true" && session) {
       setIsAuthenticated(true)
       setAdminSession(JSON.parse(session))
-      loadAdminStats()
+      loadRealTimeData()
     } else {
       router.push("/admin/login")
     }
   }, [router])
 
-  const loadAdminStats = () => {
-    // Simulate loading admin statistics
-    const mockStats = {
-      totalUsers: 1247,
-      activeUsers: 892,
-      pendingActivations: 23,
-      totalEarnings: 15420.5,
-      totalJobs: 12,
-      completedSurveys: 456,
-      pendingWithdrawals: 8,
-      totalReferrals: 234,
+  const loadRealTimeData = () => {
+    // Subscribe to real-time user data
+    const unsubscribeUsers = firebaseAdminService.subscribeToUsers((userData) => {
+      setUsers(userData)
+      setLoading(false)
+    })
+
+    // Load user statistics
+    firebaseAdminService.getUserStats().then(setUserStats)
+
+    return () => {
+      unsubscribeUsers()
     }
-    setStats(mockStats)
   }
 
   const handleLogout = () => {
@@ -71,6 +62,38 @@ export default function AdminDashboard() {
       description: "You have been successfully logged out.",
     })
     router.push("/admin/login")
+  }
+
+  const handleActivateUser = async (uid: string) => {
+    const success = await firebaseAdminService.activateUser(uid)
+    if (success) {
+      toast({
+        title: "User Activated",
+        description: "User account has been activated successfully.",
+      })
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to activate user account.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleSuspendUser = async (uid: string) => {
+    const success = await firebaseAdminService.suspendUser(uid)
+    if (success) {
+      toast({
+        title: "User Suspended",
+        description: "User account has been suspended.",
+      })
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to suspend user account.",
+        variant: "destructive",
+      })
+    }
   }
 
   if (!isAuthenticated) {
@@ -122,19 +145,19 @@ export default function AdminDashboard() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">{stats.activeUsers} active users</p>
+              <div className="text-2xl font-bold">{userStats.totalUsers.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">{userStats.activeUsers} active users</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Platform Earnings</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">New Users Today</CardTitle>
+              <UserCheck className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${stats.totalEarnings.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">{stats.pendingWithdrawals} pending withdrawals</p>
+              <div className="text-2xl font-bold">{userStats.newUsersToday}</div>
+              <p className="text-xs text-muted-foreground">{userStats.newUsersThisWeek} this week</p>
             </CardContent>
           </Card>
 
@@ -144,7 +167,7 @@ export default function AdminDashboard() {
               <Briefcase className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalJobs}</div>
+              <div className="text-2xl font-bold">12</div>
               <p className="text-xs text-muted-foreground">Across all categories</p>
             </CardContent>
           </Card>
@@ -155,7 +178,7 @@ export default function AdminDashboard() {
               <AlertCircle className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.pendingActivations}</div>
+              <div className="text-2xl font-bold">{userStats.pendingActivations}</div>
               <p className="text-xs text-muted-foreground">Account activations</p>
             </CardContent>
           </Card>
@@ -168,7 +191,7 @@ export default function AdminDashboard() {
             <TabsTrigger value="users">Users</TabsTrigger>
             <TabsTrigger value="jobs">Jobs</TabsTrigger>
             <TabsTrigger value="finance">Finance</TabsTrigger>
-            <TabsTrigger value="surveys">Surveys</TabsTrigger>
+            <TabsTrigger value="support">Support</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
@@ -177,39 +200,27 @@ export default function AdminDashboard() {
               {/* Recent Activity */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
-                  <CardDescription>Latest platform activities</CardDescription>
+                  <CardTitle>Recent User Activity</CardTitle>
+                  <CardDescription>Latest user registrations and activations</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">New user registration</p>
-                        <p className="text-xs text-gray-600">john.doe@email.com - 2 minutes ago</p>
+                    {users.slice(0, 5).map((user) => (
+                      <div key={user.uid} className="flex items-center space-x-3">
+                        <div
+                          className={`w-2 h-2 rounded-full ${user.isActivated ? "bg-green-500" : "bg-yellow-500"}`}
+                        ></div>
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{user.fullName}</p>
+                          <p className="text-xs text-gray-600">{user.email}</p>
+                        </div>
+                        <Badge
+                          className={user.isActivated ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}
+                        >
+                          {user.isActivated ? "Active" : "Pending"}
+                        </Badge>
                       </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Account activation</p>
-                        <p className="text-xs text-gray-600">sarah.wilson@email.com - 15 minutes ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Survey completed</p>
-                        <p className="text-xs text-gray-600">Welcome Survey - 1 hour ago</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Withdrawal request</p>
-                        <p className="text-xs text-gray-600">$75.00 - 2 hours ago</p>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -226,21 +237,21 @@ export default function AdminDashboard() {
                       <UserCheck className="h-5 w-5 mr-3" />
                       <div className="text-left">
                         <div className="font-medium">Review Activations</div>
-                        <div className="text-sm text-gray-600">{stats.pendingActivations} pending</div>
+                        <div className="text-sm text-gray-600">{userStats.pendingActivations} pending</div>
                       </div>
                     </Button>
                     <Button variant="outline" className="justify-start h-auto p-4">
-                      <CreditCard className="h-5 w-5 mr-3" />
+                      <MessageCircle className="h-5 w-5 mr-3" />
                       <div className="text-left">
-                        <div className="font-medium">Process Withdrawals</div>
-                        <div className="text-sm text-gray-600">{stats.pendingWithdrawals} pending</div>
+                        <div className="font-medium">Support Tickets</div>
+                        <div className="text-sm text-gray-600">Manage customer support</div>
                       </div>
                     </Button>
                     <Button variant="outline" className="justify-start h-auto p-4">
                       <Briefcase className="h-5 w-5 mr-3" />
                       <div className="text-left">
                         <div className="font-medium">Manage Jobs</div>
-                        <div className="text-sm text-gray-600">{stats.totalJobs} active jobs</div>
+                        <div className="text-sm text-gray-600">12 active jobs</div>
                       </div>
                     </Button>
                     <Button variant="outline" className="justify-start h-auto p-4">
@@ -257,7 +268,12 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="users">
-            <UserManagement />
+            <UserManagement
+              users={users}
+              onActivate={handleActivateUser}
+              onSuspend={handleSuspendUser}
+              loading={loading}
+            />
           </TabsContent>
 
           <TabsContent value="jobs">
@@ -268,8 +284,8 @@ export default function AdminDashboard() {
             <FinanceManagement />
           </TabsContent>
 
-          <TabsContent value="surveys">
-            <SurveyManagement />
+          <TabsContent value="support">
+            <AdminChat />
           </TabsContent>
 
           <TabsContent value="settings">
@@ -281,49 +297,30 @@ export default function AdminDashboard() {
   )
 }
 
-// User Management Component
-function UserManagement() {
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john.doe@email.com",
-      status: "active",
-      joinDate: "2024-01-15",
-      earnings: 125.5,
-      referrals: 3,
-      activationStatus: "activated",
-    },
-    {
-      id: 2,
-      name: "Sarah Wilson",
-      email: "sarah.wilson@email.com",
-      status: "pending",
-      joinDate: "2024-01-20",
-      earnings: 0,
-      referrals: 0,
-      activationStatus: "pending",
-    },
-    {
-      id: 3,
-      name: "Mike Johnson",
-      email: "mike.johnson@email.com",
-      status: "active",
-      joinDate: "2024-01-18",
-      earnings: 89.25,
-      referrals: 1,
-      activationStatus: "activated",
-    },
-  ])
-
-  const handleActivateUser = (userId: number) => {
-    setUsers((prev) =>
-      prev.map((user) => (user.id === userId ? { ...user, status: "active", activationStatus: "activated" } : user)),
-    )
+// Updated User Management Component with real data
+function UserManagement({
+  users,
+  onActivate,
+  onSuspend,
+  loading,
+}: {
+  users: FirebaseUser[]
+  onActivate: (uid: string) => void
+  onSuspend: (uid: string) => void
+  loading: boolean
+}) {
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return "N/A"
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
+    return date.toLocaleDateString()
   }
 
-  const handleSuspendUser = (userId: number) => {
-    setUsers((prev) => prev.map((user) => (user.id === userId ? { ...user, status: "suspended" } : user)))
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
   }
 
   return (
@@ -333,7 +330,7 @@ function UserManagement() {
           <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
           <p className="text-gray-600">Manage user accounts and activations</p>
         </div>
-        <Button>Add New User</Button>
+        <Badge variant="secondary">{users.length} Total Users</Badge>
       </div>
 
       <Card>
@@ -344,44 +341,47 @@ function UserManagement() {
         <CardContent>
           <div className="space-y-4">
             {users.map((user) => (
-              <div key={user.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div key={user.uid} className="flex items-center justify-between p-4 border rounded-lg">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3">
                     <div>
-                      <h4 className="font-medium">{user.name}</h4>
+                      <h4 className="font-medium">{user.fullName}</h4>
                       <p className="text-sm text-gray-600">{user.email}</p>
-                      <p className="text-xs text-gray-500">Joined: {user.joinDate}</p>
+                      <p className="text-xs text-gray-500">Joined: {formatDate(user.createdAt)}</p>
+                      {user.activatedAt && (
+                        <p className="text-xs text-green-600">Activated: {formatDate(user.activatedAt)}</p>
+                      )}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
-                    <p className="text-sm font-medium">${user.earnings.toFixed(2)}</p>
-                    <p className="text-xs text-gray-600">{user.referrals} referrals</p>
+                    <p className="text-sm font-medium">{user.role || "user"}</p>
+                    <p className="text-xs text-gray-600">{user.applications?.length || 0} applications</p>
                   </div>
                   <Badge
                     className={
-                      user.status === "active"
+                      user.isActivated
                         ? "bg-green-100 text-green-800"
-                        : user.status === "pending"
+                        : user.activationPending
                           ? "bg-yellow-100 text-yellow-800"
                           : "bg-red-100 text-red-800"
                     }
                   >
-                    {user.status}
+                    {user.isActivated ? "Active" : user.activationPending ? "Pending" : "Inactive"}
                   </Badge>
                   <div className="flex space-x-2">
-                    {user.activationStatus === "pending" && (
+                    {!user.isActivated && (
                       <Button
                         size="sm"
-                        onClick={() => handleActivateUser(user.id)}
+                        onClick={() => onActivate(user.uid)}
                         className="bg-green-600 hover:bg-green-700"
                       >
                         Activate
                       </Button>
                     )}
-                    <Button size="sm" variant="outline" onClick={() => handleSuspendUser(user.id)}>
-                      Suspend
+                    <Button size="sm" variant="outline" onClick={() => onSuspend(user.uid)}>
+                      {user.isActivated ? "Suspend" : "Delete"}
                     </Button>
                   </div>
                 </div>
@@ -394,7 +394,7 @@ function UserManagement() {
   )
 }
 
-// Job Management Component
+// Keep existing components for Jobs, Finance, and Settings
 function JobManagement() {
   const [jobs, setJobs] = useState([
     {
@@ -469,7 +469,6 @@ function JobManagement() {
   )
 }
 
-// Finance Management Component
 function FinanceManagement() {
   const [withdrawals, setWithdrawals] = useState([
     {
@@ -584,87 +583,6 @@ function FinanceManagement() {
   )
 }
 
-// Survey Management Component
-function SurveyManagement() {
-  const surveyStats = {
-    totalResponses: 456,
-    completionRate: 87,
-    averageTime: "2.3 minutes",
-    topCategories: [
-      { name: "Surveys & Market Research", interest: 78 },
-      { name: "Data Entry", interest: 65 },
-      { name: "Virtual Assistance", interest: 52 },
-    ],
-  }
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Survey Management</h2>
-        <p className="text-gray-600">Welcome survey analytics and responses</p>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Total Responses</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{surveyStats.totalResponses}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{surveyStats.completionRate}%</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Average Time</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{surveyStats.averageTime}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Survey Earnings</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${(surveyStats.totalResponses * 1.5).toFixed(2)}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Popular Job Categories</CardTitle>
-          <CardDescription>Based on survey responses</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {surveyStats.topCategories.map((category, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span className="font-medium">{category.name}</span>
-                <div className="flex items-center space-x-3">
-                  <div className="w-32 bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${category.interest}%` }}></div>
-                  </div>
-                  <span className="text-sm font-medium">{category.interest}%</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-// Settings Management Component
 function SettingsManagement() {
   const [settings, setSettings] = useState({
     activationFee: 5.0,

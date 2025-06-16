@@ -39,11 +39,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useJobs, type Job } from "@/lib/job-manager"
 
 export default function JobsPage() {
-  const { userProfile, loading: authLoading } = useAuth()
+  const { userProfile, loading: authLoading, isAccountActivated, activateAccount } = useAuth()
   const { jobs, loading: jobsLoading, jobManager } = useJobs()
   const { toast } = useToast()
   const router = useRouter()
-  const [isActivated, setIsActivated] = useState(false)
   const [activationDialogOpen, setActivationDialogOpen] = useState(false)
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null)
   const [activeCategory, setActiveCategory] = useState("all")
@@ -89,12 +88,6 @@ export default function JobsPage() {
   }, [jobs, searchTerm, difficultyFilter])
 
   useEffect(() => {
-    // Initialize client-side state
-    const activationStatus = localStorage.getItem("account_activated")
-    if (activationStatus === "true") {
-      setIsActivated(true)
-    }
-
     // Check survey completion status
     const surveyStatus = localStorage.getItem("welcome_survey_completed")
     if (surveyStatus === "true") {
@@ -106,26 +99,36 @@ export default function JobsPage() {
     const paymentStatus = urlParams.get("payment_status")
 
     if (paymentStatus === "success") {
-      localStorage.setItem("account_activated", "true")
-      setIsActivated(true)
+      // Activate the account
+      activateAccount()
+        .then(() => {
+          const pendingJobId = sessionStorage.getItem("pending_job_id")
+          if (pendingJobId) {
+            sessionStorage.removeItem("pending_job_id")
+            router.push(`/job/${pendingJobId}`)
+          }
 
-      const pendingJobId = sessionStorage.getItem("pending_job_id")
-      if (pendingJobId) {
-        sessionStorage.removeItem("pending_job_id")
-        router.push(`/job/${pendingJobId}`)
-      }
-
-      toast({
-        title: "Account Activated! 🎉",
-        description: "Your account has been successfully activated. You now have access to all job details.",
-      })
+          toast({
+            title: "Account Activated! 🎉",
+            description: "Your account has been successfully activated. You now have access to all job details.",
+          })
+        })
+        .catch((error) => {
+          console.error("Error activating account:", error)
+          toast({
+            title: "Activation Error",
+            description: "There was an issue activating your account. Please contact support.",
+            variant: "destructive",
+          })
+        })
     }
 
     setIsInitialized(true)
-  }, [toast, router])
+  }, [toast, router, activateAccount])
 
   const handleViewDetails = (jobId: string) => {
-    if (isActivated) {
+    // CRITICAL: Use the isAccountActivated function to check status
+    if (isAccountActivated()) {
       router.push(`/job/${jobId}`)
     } else {
       setSelectedJobId(jobId)
@@ -201,6 +204,13 @@ export default function JobsPage() {
               competitive pay.
             </p>
 
+            {/* Show activation status */}
+            {isAccountActivated() && (
+              <div className="mb-6">
+                <Badge className="bg-green-500 text-white px-4 py-2 text-sm">✓ Account Activated - Full Access</Badge>
+              </div>
+            )}
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <Button
                 size="lg"
@@ -240,8 +250,8 @@ export default function JobsPage() {
         </div>
       </section>
 
-      {/* Welcome Survey Section */}
-      {!surveyCompleted && (
+      {/* Welcome Survey Section - Only show if not activated */}
+      {!surveyCompleted && !isAccountActivated() && (
         <section className="py-8 px-4 bg-gradient-to-r from-green-50 to-emerald-50 border-b border-green-200">
           <div className="container mx-auto max-w-4xl">
             <div className="bg-white rounded-xl shadow-lg border border-green-200 overflow-hidden">
@@ -286,7 +296,7 @@ export default function JobsPage() {
                     </ul>
                     <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
                       <p className="text-sm text-green-800">
-                        <strong>Note:</strong> Minimum withdrawal amount is $50. Your survey earnings will be added to
+                        <strong>Note:</strong> Minimum withdrawal amount is $25. Your survey earnings will be added to
                         your account balance.
                       </p>
                     </div>
@@ -363,7 +373,7 @@ export default function JobsPage() {
 
             <div className="grid gap-6 md:grid-cols-2">
               {featuredJobs.map((job) => (
-                <JobCard key={job.id} job={job} onViewDetails={handleViewDetails} />
+                <JobCard key={job.id} job={job} onViewDetails={handleViewDetails} isActivated={isAccountActivated()} />
               ))}
             </div>
           </div>
@@ -458,7 +468,12 @@ export default function JobsPage() {
                     </h3>
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                       {categoryJobs.map((job) => (
-                        <JobCard key={job.id} job={job} onViewDetails={handleViewDetails} />
+                        <JobCard
+                          key={job.id}
+                          job={job}
+                          onViewDetails={handleViewDetails}
+                          isActivated={isAccountActivated()}
+                        />
                       ))}
                     </div>
                   </div>
@@ -469,7 +484,12 @@ export default function JobsPage() {
                 <TabsContent key={category} value={category} className="space-y-6">
                   <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {jobsByCategory[category]?.map((job) => (
-                      <JobCard key={job.id} job={job} onViewDetails={handleViewDetails} />
+                      <JobCard
+                        key={job.id}
+                        job={job}
+                        onViewDetails={handleViewDetails}
+                        isActivated={isAccountActivated()}
+                      />
                     ))}
                   </div>
                 </TabsContent>
@@ -514,7 +534,7 @@ export default function JobsPage() {
               <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mb-4">
                 <TrendingUp className="h-6 w-6 text-white" />
               </div>
-              <h3 className="font-semibold text-lg mb-2">Quality Over Quantity</h3>
+              <h3 className="font-semibent text-lg mb-2">Quality Over Quantity</h3>
               <p className="text-gray-600">
                 Focus on delivering high-quality work rather than rushing through tasks. Quality work leads to better
                 ratings and higher-paying assignments.
@@ -646,65 +666,70 @@ export default function JobsPage() {
         </div>
       </footer>
 
-      {/* Account Activation Dialog */}
-      <Dialog open={activationDialogOpen} onOpenChange={setActivationDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <CheckCircle className="h-5 w-5 text-blue-600 mr-2" />
-              Account Activation Required
-            </DialogTitle>
-            <DialogDescription>
-              To view job details and apply for positions, a one-time account activation fee of $5.00 is required.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col space-y-4 py-4">
-            <div className="rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 p-4 border border-blue-200">
-              <h3 className="font-medium mb-3 text-gray-900">✨ Benefits of Account Activation:</h3>
-              <ul className="space-y-2 text-sm">
-                <li className="flex items-start">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>Access to all job details and application forms</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>Apply to unlimited job opportunities</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>Receive job alerts for new opportunities</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>Track your applications and earnings</span>
-                </li>
-                <li className="flex items-start">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span>Priority support and faster payments</span>
-                </li>
-              </ul>
+      {/* Account Activation Dialog - Only show if NOT activated */}
+      {!isAccountActivated() && (
+        <Dialog open={activationDialogOpen} onOpenChange={setActivationDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <CheckCircle className="h-5 w-5 text-blue-600 mr-2" />
+                Account Activation Required
+              </DialogTitle>
+              <DialogDescription>
+                To view job details and apply for positions, a one-time account activation fee of $5.00 is required.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col space-y-4 py-4">
+              <div className="rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 p-4 border border-blue-200">
+                <h3 className="font-medium mb-3 text-gray-900">✨ Benefits of Account Activation:</h3>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start">
+                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Access to all job details and application forms</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Apply to unlimited job opportunities</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Receive job alerts for new opportunities</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Track your applications and earnings</span>
+                  </li>
+                  <li className="flex items-start">
+                    <CheckCircle className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span>Priority support and faster payments</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">One-time payment: $5.00</div>
+                <div className="text-sm text-gray-600">Secure payment via PayPal</div>
+                <div className="text-xs text-green-600 mt-1 font-medium">
+                  ✓ Never asked for payment again after activation
+                </div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">One-time payment: $5.00</div>
-              <div className="text-sm text-gray-600">Secure payment via PayPal</div>
-            </div>
-          </div>
-          <DialogFooter className="flex-col sm:flex-row sm:justify-between gap-2">
-            <Button variant="outline" onClick={() => setActivationDialogOpen(false)}>
-              Maybe Later
-            </Button>
-            <Button
-              onClick={() => {
-                console.log("Activate button clicked")
-                handlePaymentRedirect()
-              }}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            >
-              Activate Account Now
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter className="flex-col sm:flex-row sm:justify-between gap-2">
+              <Button variant="outline" onClick={() => setActivationDialogOpen(false)}>
+                Maybe Later
+              </Button>
+              <Button
+                onClick={() => {
+                  console.log("Activate button clicked")
+                  handlePaymentRedirect()
+                }}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                Activate Account Now
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
@@ -772,9 +797,10 @@ function JobCardSkeleton() {
 interface JobCardProps {
   job: Job
   onViewDetails: (jobId: string) => void
+  isActivated: boolean
 }
 
-function JobCard({ job, onViewDetails }: JobCardProps) {
+function JobCard({ job, onViewDetails, isActivated }: JobCardProps) {
   const getDifficultyColor = (level: string) => {
     switch (level) {
       case "Beginner":
@@ -849,10 +875,14 @@ function JobCard({ job, onViewDetails }: JobCardProps) {
       </div>
       <div>
         <Button
-          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg group-hover:shadow-xl transition-all"
+          className={`w-full shadow-lg group-hover:shadow-xl transition-all ${
+            isActivated
+              ? "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+              : "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white"
+          }`}
           onClick={() => onViewDetails(job.id)}
         >
-          View Details & Apply
+          {isActivated ? "View Details & Apply" : "Activate to View Details"}
           <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
         </Button>
       </div>

@@ -28,6 +28,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   updateUserProfile: (data: Partial<UserProfile>) => Promise<void>
+  activateAccount: () => Promise<void>
+  isAccountActivated: () => boolean
 }
 
 export interface UserProfile {
@@ -36,6 +38,8 @@ export interface UserProfile {
   fullName: string
   isActivated: boolean
   activationPending: boolean
+  activatedAt?: string
+  activationPaymentId?: string
   createdAt: any
   updatedAt: any
   applications?: string[]
@@ -118,7 +122,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     role: profile.role || "user",
                   }),
                 )
+
+                // CRITICAL: Store activation status based on profile data
                 localStorage.setItem("account_activated", profile.isActivated.toString())
+
+                // Also store activation timestamp if available
+                if (profile.activatedAt) {
+                  localStorage.setItem("account_activated_at", profile.activatedAt)
+                }
               } else {
                 console.log("No user profile found, creating basic profile")
                 const basicProfile: UserProfile = {
@@ -169,11 +180,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
               role: "user",
             }
             setUserProfile(basicProfile)
+            localStorage.setItem("account_activated", "false")
           }
         } else {
           setUserProfile(null)
           localStorage.removeItem("user_data")
           localStorage.removeItem("account_activated")
+          localStorage.removeItem("account_activated_at")
         }
 
         setLoading(false)
@@ -272,6 +285,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         fullName: "Preview User",
         isActivated: true,
         activationPending: false,
+        activatedAt: new Date().toISOString(),
         createdAt: new Date(),
         updatedAt: new Date(),
         applications: [],
@@ -288,6 +302,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }),
       )
       localStorage.setItem("account_activated", "true")
+      localStorage.setItem("account_activated_at", mockProfile.activatedAt!)
       return
     }
 
@@ -312,6 +327,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUserProfile(null)
       localStorage.removeItem("user_data")
       localStorage.removeItem("account_activated")
+      localStorage.removeItem("account_activated_at")
       router.push("/")
       return
     }
@@ -332,6 +348,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  const activateAccount = async () => {
+    if (!userProfile) {
+      throw new Error("No user profile found")
+    }
+
+    const activationData = {
+      isActivated: true,
+      activationPending: false,
+      activatedAt: new Date().toISOString(),
+      activationPaymentId: `payment_${Date.now()}`, // In real app, this would come from payment processor
+    }
+
+    await updateUserProfile(activationData)
+
+    console.log("Account activated successfully for user:", userProfile.email)
+  }
+
   const updateUserProfile = async (data: Partial<UserProfile>) => {
     if (isPreview) {
       const updatedProfile = userProfile ? { ...userProfile, ...data } : null
@@ -348,8 +381,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         )
       }
 
+      // CRITICAL: Update activation status in localStorage
       if (data.isActivated !== undefined) {
         localStorage.setItem("account_activated", data.isActivated.toString())
+        if (data.isActivated && data.activatedAt) {
+          localStorage.setItem("account_activated_at", data.activatedAt)
+        }
       }
       return
     }
@@ -386,13 +423,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         )
       }
 
+      // CRITICAL: Update activation status in localStorage
       if (data.isActivated !== undefined) {
         localStorage.setItem("account_activated", data.isActivated.toString())
+        if (data.isActivated && data.activatedAt) {
+          localStorage.setItem("account_activated_at", data.activatedAt)
+        }
       }
     } catch (error) {
       console.error("Error updating user profile:", error)
       throw error
     }
+  }
+
+  const isAccountActivated = (): boolean => {
+    // Check multiple sources for activation status
+    if (userProfile?.isActivated) return true
+
+    const localStorageStatus = localStorage.getItem("account_activated")
+    if (localStorageStatus === "true") return true
+
+    // Check if there's an activation timestamp
+    const activatedAt = localStorage.getItem("account_activated_at")
+    if (activatedAt) return true
+
+    return false
   }
 
   return (
@@ -407,6 +462,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         login,
         logout,
         updateUserProfile,
+        activateAccount,
+        isAccountActivated,
       }}
     >
       {children}
