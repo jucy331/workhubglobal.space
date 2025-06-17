@@ -37,6 +37,9 @@ export default function EarningsPage() {
   const transactions = rm.getUserTransactions(userId)
   const feeStructure = rm.getFeeStructure()
 
+  // Set minimum withdrawal to $50 as requested
+  const MINIMUM_WITHDRAWAL = 50.0
+
   useEffect(() => {
     if (!loading && !userProfile) {
       router.push("/login?redirect=/earnings")
@@ -58,6 +61,24 @@ export default function EarningsPage() {
       toast({
         title: "Invalid Amount",
         description: "Please enter a valid withdrawal amount.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (amount < MINIMUM_WITHDRAWAL) {
+      toast({
+        title: "Amount Too Low",
+        description: `Minimum withdrawal amount is $${MINIMUM_WITHDRAWAL.toFixed(2)}.`,
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (amount > earnings.availableBalance) {
+      toast({
+        title: "Insufficient Balance",
+        description: "You don't have enough balance for this withdrawal.",
         variant: "destructive",
       })
       return
@@ -125,7 +146,11 @@ export default function EarningsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">${earnings.availableBalance.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">Ready for withdrawal</p>
+            <p className="text-xs text-muted-foreground">
+              {earnings.availableBalance >= MINIMUM_WITHDRAWAL
+                ? "Ready for withdrawal"
+                : `Need $${(MINIMUM_WITHDRAWAL - earnings.availableBalance).toFixed(2)} more`}
+            </p>
           </CardContent>
         </Card>
 
@@ -171,137 +196,158 @@ export default function EarningsPage() {
             Withdraw Earnings
           </CardTitle>
           <CardDescription>
-            Minimum withdrawal: ${feeStructure.minimumWithdrawal.toFixed(2)} | Withdrawal fee: $
+            Minimum withdrawal: ${MINIMUM_WITHDRAWAL.toFixed(2)} | Withdrawal fee: $
             {feeStructure.withdrawalFee.toFixed(2)} + {feeStructure.withdrawalFeePercentage}%
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="amount">Withdrawal Amount ($)</Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  step="0.01"
-                  min={feeStructure.minimumWithdrawal}
-                  max={earnings.availableBalance}
-                  value={withdrawalAmount}
-                  onChange={(e) => setWithdrawalAmount(e.target.value)}
-                  placeholder={`Min: $${feeStructure.minimumWithdrawal}`}
-                />
+          {earnings.availableBalance < MINIMUM_WITHDRAWAL ? (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-yellow-900">Minimum Balance Required</h4>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    You need at least ${MINIMUM_WITHDRAWAL.toFixed(2)} to make a withdrawal. Complete more jobs to reach
+                    the minimum threshold.
+                  </p>
+                  <p className="text-sm text-yellow-700 mt-1">
+                    Current balance: ${earnings.availableBalance.toFixed(2)} | Need: $
+                    {(MINIMUM_WITHDRAWAL - earnings.availableBalance).toFixed(2)} more
+                  </p>
+                </div>
               </div>
-
-              <div>
-                <Label htmlFor="method">Withdrawal Method</Label>
-                <Select value={withdrawalMethod} onValueChange={setWithdrawalMethod}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select withdrawal method" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="paypal">PayPal</SelectItem>
-                    <SelectItem value="bank">Bank Transfer</SelectItem>
-                    <SelectItem value="crypto">Cryptocurrency</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button
-                    className="w-full"
-                    disabled={
-                      !withdrawalAmount ||
-                      !withdrawalMethod ||
-                      Number.parseFloat(withdrawalAmount || "0") < feeStructure.minimumWithdrawal
-                    }
-                  >
-                    <Download className="h-4 w-4 mr-2" />
-                    Withdraw Funds
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Confirm Withdrawal</DialogTitle>
-                    <DialogDescription>Please review your withdrawal details before confirming.</DialogDescription>
-                  </DialogHeader>
-
-                  {withdrawalFeePreview && (
-                    <div className="space-y-4">
-                      <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                        <div className="flex justify-between">
-                          <span>Withdrawal Amount:</span>
-                          <span className="font-medium">${Number.parseFloat(withdrawalAmount || "0").toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between text-sm text-gray-600">
-                          <span>Fixed Fee:</span>
-                          <span>${withdrawalFeePreview.fixedFee.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between text-sm text-gray-600">
-                          <span>Percentage Fee ({feeStructure.withdrawalFeePercentage}%):</span>
-                          <span>${withdrawalFeePreview.percentageFee.toFixed(2)}</span>
-                        </div>
-                        <div className="border-t pt-2 flex justify-between font-medium">
-                          <span>You'll Receive:</span>
-                          <span className="text-green-600">${withdrawalFeePreview.netAmount.toFixed(2)}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start space-x-2 text-sm text-gray-600">
-                        <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                        <p>
-                          Withdrawals typically process within 1-3 business days. You'll receive an email confirmation
-                          once processed.
-                        </p>
-                      </div>
-
-                      <Button
-                        onClick={handleWithdrawal}
-                        disabled={isWithdrawing || !withdrawalFeePreview.canWithdraw}
-                        className="w-full"
-                      >
-                        {isWithdrawing ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                            Processing...
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Confirm Withdrawal
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  )}
-                </DialogContent>
-              </Dialog>
             </div>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="amount">Withdrawal Amount ($)</Label>
+                  <Input
+                    id="amount"
+                    type="number"
+                    step="0.01"
+                    min={MINIMUM_WITHDRAWAL}
+                    max={earnings.availableBalance}
+                    value={withdrawalAmount}
+                    onChange={(e) => setWithdrawalAmount(e.target.value)}
+                    placeholder={`Min: $${MINIMUM_WITHDRAWAL}`}
+                  />
+                </div>
 
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2">Fee Structure</h4>
-              <div className="space-y-2 text-sm text-blue-800">
-                <div className="flex justify-between">
-                  <span>Platform Commission:</span>
-                  <span>{feeStructure.platformCommission}%</span>
+                <div>
+                  <Label htmlFor="method">Withdrawal Method</Label>
+                  <Select value={withdrawalMethod} onValueChange={setWithdrawalMethod}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select withdrawal method" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="paypal">PayPal</SelectItem>
+                      <SelectItem value="bank">Bank Transfer</SelectItem>
+                      <SelectItem value="crypto">Cryptocurrency</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div className="flex justify-between">
-                  <span>Withdrawal Fee:</span>
-                  <span>
-                    ${feeStructure.withdrawalFee} + {feeStructure.withdrawalFeePercentage}%
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Minimum Withdrawal:</span>
-                  <span>${feeStructure.minimumWithdrawal}</span>
-                </div>
+
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      className="w-full"
+                      disabled={
+                        !withdrawalAmount ||
+                        !withdrawalMethod ||
+                        Number.parseFloat(withdrawalAmount || "0") < MINIMUM_WITHDRAWAL ||
+                        Number.parseFloat(withdrawalAmount || "0") > earnings.availableBalance
+                      }
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Withdraw Funds
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Confirm Withdrawal</DialogTitle>
+                      <DialogDescription>Please review your withdrawal details before confirming.</DialogDescription>
+                    </DialogHeader>
+
+                    {withdrawalFeePreview && (
+                      <div className="space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                          <div className="flex justify-between">
+                            <span>Withdrawal Amount:</span>
+                            <span className="font-medium">
+                              ${Number.parseFloat(withdrawalAmount || "0").toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm text-gray-600">
+                            <span>Fixed Fee:</span>
+                            <span>${withdrawalFeePreview.fixedFee.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-sm text-gray-600">
+                            <span>Percentage Fee ({feeStructure.withdrawalFeePercentage}%):</span>
+                            <span>${withdrawalFeePreview.percentageFee.toFixed(2)}</span>
+                          </div>
+                          <div className="border-t pt-2 flex justify-between font-medium">
+                            <span>You'll Receive:</span>
+                            <span className="text-green-600">${withdrawalFeePreview.netAmount.toFixed(2)}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start space-x-2 text-sm text-gray-600">
+                          <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                          <p>
+                            Withdrawals typically process within 1-3 business days. You'll receive an email confirmation
+                            once processed.
+                          </p>
+                        </div>
+
+                        <Button
+                          onClick={handleWithdrawal}
+                          disabled={isWithdrawing || !withdrawalFeePreview.canWithdraw}
+                          className="w-full"
+                        >
+                          {isWithdrawing ? (
+                            <>
+                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                              Processing...
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              Confirm Withdrawal
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </DialogContent>
+                </Dialog>
               </div>
-              <p className="text-xs text-blue-700 mt-3">
-                Our transparent fee structure ensures fair compensation for all parties while maintaining platform
-                sustainability.
-              </p>
+
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <h4 className="font-medium text-blue-900 mb-2">Withdrawal Information</h4>
+                <div className="space-y-2 text-sm text-blue-800">
+                  <div className="flex justify-between">
+                    <span>Minimum Withdrawal:</span>
+                    <span>${MINIMUM_WITHDRAWAL.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Withdrawal Fee:</span>
+                    <span>
+                      ${feeStructure.withdrawalFee} + {feeStructure.withdrawalFeePercentage}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Processing Time:</span>
+                    <span>1-3 business days</span>
+                  </div>
+                </div>
+                <p className="text-xs text-blue-700 mt-3">
+                  Complete more jobs to increase your earnings and reach withdrawal thresholds faster.
+                </p>
+              </div>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 

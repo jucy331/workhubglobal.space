@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MessageCircle, Send, User, Filter, Clock, Search, RefreshCw } from "lucide-react"
+import { MessageCircle, Send, User, Filter, Clock, Search, RefreshCw, Briefcase, Users } from "lucide-react"
 import { firebaseAdminService, type SupportTicket, type ChatMessage } from "@/lib/firebase-admin"
 import { useToast } from "@/hooks/use-toast"
 
@@ -21,6 +21,8 @@ export function AdminChat() {
   const [newMessage, setNewMessage] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [priorityFilter, setPriorityFilter] = useState<string>("all")
+  const [roleFilter, setRoleFilter] = useState<string>("all")
+  const [categoryFilter, setCategoryFilter] = useState<string>("all")
   const [searchTerm, setSearchTerm] = useState("")
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -59,8 +61,18 @@ export function AdminChat() {
       filtered = filtered.filter((ticket) => ticket.priority === priorityFilter)
     }
 
+    // Apply role filter (user vs employer)
+    if (roleFilter !== "all") {
+      filtered = filtered.filter((ticket) => ticket.userRole === roleFilter)
+    }
+
+    // Apply category filter
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter((ticket) => ticket.category === categoryFilter)
+    }
+
     setFilteredTickets(filtered)
-  }, [tickets, statusFilter, priorityFilter, searchTerm])
+  }, [tickets, statusFilter, priorityFilter, roleFilter, categoryFilter, searchTerm])
 
   useEffect(() => {
     if (!selectedTicket) return
@@ -88,8 +100,9 @@ export function AdminChat() {
         undefined,
         undefined,
         undefined,
-        "admin_001", // In real app, get from admin session
-        "Support Team",
+        "admin", // userRole
+        "admin_001", // adminId
+        "Support Team", // adminName
       )
 
       if (success) {
@@ -164,6 +177,28 @@ export function AdminChat() {
     }
   }
 
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case "user":
+        return "bg-green-100 text-green-800"
+      case "employer":
+        return "bg-purple-100 text-purple-800"
+      default:
+        return "bg-gray-100 text-gray-800"
+    }
+  }
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case "user":
+        return <User className="h-3 w-3" />
+      case "employer":
+        return <Briefcase className="h-3 w-3" />
+      default:
+        return <Users className="h-3 w-3" />
+    }
+  }
+
   const formatTimestamp = (timestamp: any) => {
     if (!timestamp) return ""
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp)
@@ -198,7 +233,7 @@ export function AdminChat() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Support Chat</h2>
-          <p className="text-gray-600">Manage customer support tickets</p>
+          <p className="text-gray-600">Manage conversations with clients and workers</p>
         </div>
         <div className="flex items-center space-x-4">
           <Button
@@ -214,7 +249,7 @@ export function AdminChat() {
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Enhanced Filters */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -223,7 +258,7 @@ export function AdminChat() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-5">
             <div>
               <label className="text-sm font-medium">Search</label>
               <div className="relative mt-1">
@@ -235,6 +270,19 @@ export function AdminChat() {
                   className="pl-10"
                 />
               </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">User Type</label>
+              <Select value={roleFilter} onValueChange={setRoleFilter}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Users</SelectItem>
+                  <SelectItem value="user">Workers</SelectItem>
+                  <SelectItem value="employer">Employers</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <label className="text-sm font-medium">Status</label>
@@ -266,21 +314,39 @@ export function AdminChat() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-end">
-              <div className="text-sm">
-                <p className="font-medium">Showing {filteredTickets.length} tickets</p>
-                <p className="text-gray-600">
-                  {filteredTickets.filter((t) => t.status === "open").length} open,{" "}
-                  {filteredTickets.filter((t) => t.status === "in-progress").length} in progress
-                </p>
-              </div>
+            <div>
+              <label className="text-sm font-medium">Category</label>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="technical">Technical</SelectItem>
+                  <SelectItem value="payment">Payment</SelectItem>
+                  <SelectItem value="job-related">Job Related</SelectItem>
+                  <SelectItem value="account">Account</SelectItem>
+                  <SelectItem value="general">General</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
+            <p>
+              Showing {filteredTickets.length} of {tickets.length} tickets
+            </p>
+            <div className="flex space-x-4">
+              <span>Open: {filteredTickets.filter((t) => t.status === "open").length}</span>
+              <span>In Progress: {filteredTickets.filter((t) => t.status === "in-progress").length}</span>
+              <span>Workers: {filteredTickets.filter((t) => t.userRole === "user").length}</span>
+              <span>Employers: {filteredTickets.filter((t) => t.userRole === "employer").length}</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
       <div className="grid gap-6 md:grid-cols-3">
-        {/* Tickets List */}
+        {/* Enhanced Tickets List */}
         <div className="md:col-span-1">
           <Card>
             <CardHeader>
@@ -311,10 +377,16 @@ export function AdminChat() {
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
                             <h4 className="font-medium text-sm truncate">{ticket.subject}</h4>
-                            <p className="text-xs text-gray-600">{ticket.userName}</p>
+                            <div className="flex items-center space-x-1 mt-1">
+                              {getRoleIcon(ticket.userRole)}
+                              <p className="text-xs text-gray-600">{ticket.userName}</p>
+                            </div>
                             <p className="text-xs text-gray-500">{ticket.userEmail}</p>
                           </div>
                           <div className="flex flex-col items-end space-y-1">
+                            <Badge className={`text-xs ${getRoleColor(ticket.userRole)}`}>
+                              {ticket.userRole === "user" ? "Worker" : "Employer"}
+                            </Badge>
                             <Badge className={`text-xs ${getStatusColor(ticket.status)}`}>{ticket.status}</Badge>
                             <Badge className={`text-xs ${getPriorityColor(ticket.priority)}`}>{ticket.priority}</Badge>
                           </div>
@@ -329,6 +401,13 @@ export function AdminChat() {
                             <span>{getTimeAgo(ticket.lastMessageAt)}</span>
                           </div>
                         </div>
+                        {ticket.category && (
+                          <div className="mt-2">
+                            <Badge variant="outline" className="text-xs">
+                              {ticket.category}
+                            </Badge>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -338,7 +417,7 @@ export function AdminChat() {
           </Card>
         </div>
 
-        {/* Chat Area */}
+        {/* Enhanced Chat Area */}
         <div className="md:col-span-2">
           {selectedTicket ? (
             <Card className="h-[600px] flex flex-col">
@@ -346,10 +425,19 @@ export function AdminChat() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-lg">{selectedTicket.subject}</CardTitle>
-                    <p className="text-sm text-gray-600">
-                      {selectedTicket.userName} ({selectedTicket.userEmail})
-                    </p>
+                    <div className="flex items-center space-x-2 mt-1">
+                      {getRoleIcon(selectedTicket.userRole)}
+                      <p className="text-sm text-gray-600">
+                        {selectedTicket.userName} ({selectedTicket.userEmail})
+                      </p>
+                      <Badge className={`text-xs ${getRoleColor(selectedTicket.userRole)}`}>
+                        {selectedTicket.userRole === "user" ? "Worker" : "Employer"}
+                      </Badge>
+                    </div>
                     <p className="text-xs text-gray-500">Created {formatTimestamp(selectedTicket.createdAt)}</p>
+                    {selectedTicket.relatedJobId && (
+                      <p className="text-xs text-blue-600">Related to Job ID: {selectedTicket.relatedJobId}</p>
+                    )}
                   </div>
                   <div className="flex items-center space-x-2">
                     <Select
@@ -400,9 +488,11 @@ export function AdminChat() {
                         >
                           <div className="flex items-center space-x-2 mb-1">
                             <div className="flex items-center space-x-1">
-                              <User className="h-3 w-3" />
+                              {message.isFromAdmin ? <User className="h-3 w-3" /> : getRoleIcon(message.userRole)}
                               <span className="text-xs font-medium">
-                                {message.isFromAdmin ? message.adminName || "Support Team" : message.userName}
+                                {message.isFromAdmin
+                                  ? message.adminName || "Support Team"
+                                  : `${message.userName} (${message.userRole === "user" ? "Worker" : "Employer"})`}
                               </span>
                             </div>
                             <span className="text-xs opacity-70">{formatTimestamp(message.timestamp)}</span>
@@ -448,6 +538,10 @@ export function AdminChat() {
                 <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Select a Ticket</h3>
                 <p className="text-gray-600">Choose a support ticket to view the conversation</p>
+                <div className="mt-4 text-sm text-gray-500">
+                  <p>💼 Employers can get help with job posting and data collection</p>
+                  <p>👥 Workers can get support with account activation and payments</p>
+                </div>
               </div>
             </Card>
           )}
